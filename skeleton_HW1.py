@@ -25,7 +25,7 @@ def main():
     p_true = np.array([[2,-4]])
 #    p_true = np.array([[2,-4])
                        
-    plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref)
+   # plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref)
     
     # load measured data and reference measurements for the chosen scenario
     data,reference_measurement = load_data(scenario)
@@ -61,14 +61,45 @@ def main():
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 def parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref):
-    """ estimate the model parameters for all 4 anchors based on the reference measurements, i.e., for anchor i consider reference_measurement[:,i]
+    """ estimate the model parameters for all 4 anchors based
+     on the reference measurements, i.e., for anchor i consider reference_measurement[:,i]
     Input:
         reference_measurement... nr_measurements x nr_anchors
         nr_anchors... scalar
         p_anchor... position of anchors, nr_anchors x 2
         p_ref... reference point, 2x2 """
+
     params = np.zeros([1, nr_anchors])
-    #TODO (1) check whether a given anchor is Gaussian or exponential
+
+    colors = ['red', 'orange', 'green', 'blue']
+    num_bins = 120
+    fig, axs = plt.subplots(2, 2)
+    axs[0, 0].hist(reference_measurement[:,0], num_bins, facecolor=colors[0], alpha=0.40)
+    axs[0, 0].set_title('Anchor 1')
+    axs[0, 1].hist(reference_measurement[:,1], num_bins, facecolor=colors[1], alpha=0.40)
+    axs[0, 1].set_title('Anchor 2')
+    axs[1, 0].hist(reference_measurement[:,2], num_bins, facecolor=colors[2], alpha=0.40)
+    axs[1, 0].set_title('Anchor 3')
+    axs[1, 1].hist(reference_measurement[:,3], num_bins, facecolor=colors[3], alpha=0.40)
+    axs[1, 1].set_title('Anchor 4')
+
+    for ax in axs.flat:
+        ax.set(xlabel='Bins', ylabel='Amount')
+
+    # Hide x labels and tick labels for top plots and y ticks for right plots.
+    for ax in axs.flat:
+        ax.label_outer()
+
+    for ax in fig.get_axes():
+        ax.label_outer()
+
+    plt.show()
+
+
+    for i, column in enumerate(reference_measurement.T):
+        params[0, i] = np.mean(column)
+        print((np.subtract(column, params[0, i])))
+    print(params)
     #TODO (2) estimate the according parameter based 
     return params
 #--------------------------------------------------------------------------------
