@@ -69,7 +69,7 @@ def parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref):
         p_anchor... position of anchors, nr_anchors x 2
         p_ref... reference point, 2x2 """
 
-    params = np.zeros([1, nr_anchors])
+    params = np.zeros([3, nr_anchors])
 
     colors = ['red', 'orange', 'green', 'blue']
     num_bins = 120
@@ -97,7 +97,17 @@ def parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref):
 
 
     for i, column in enumerate(reference_measurement.T):
+        # mμ
         params[0, i] = np.mean(column)
+
+        # sigma
+        params[1,i] = np.sqrt(np.mean((column - np.mean(column))**2))
+        
+        # lambda
+        real_dist = np.linalg.norm(p_anchor[i]- p_ref)
+        params[2,i] = 1 / np.mean(column - real_dist)
+
+
         print((np.subtract(column, params[0, i])))
     print(params)
     #TODO (2) estimate the according parameter based 
