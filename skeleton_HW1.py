@@ -6,6 +6,8 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
+from numpy.linalg import inv, norm  #for GN method
+
 #--------------------------------------------------------------------------------
 # Assignment 1
 def main():
@@ -23,9 +25,8 @@ def main():
     p_ref = np.array([[0,0]])
     # true position of the agent (has to be estimated)
     p_true = np.array([[2,-4]])
-#    p_true = np.array([[2,-4])
                        
-   # plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref)
+    # plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref)
     
     # load measured data and reference measurements for the chosen scenario
     data,reference_measurement = load_data(scenario)
@@ -123,12 +124,14 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
         use_exponential... determines if the exponential anchor in scenario 2 is used, bool"""
     nr_samples = np.size(data,0)
     
-    #TODO set parameters
-    #tol = ...  # tolerance
-    #max_iter = ...  # maximum iterations for GN
-    
-    # TODO estimate position for  i in range(0, nr_samples)
-    # least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol)
+    tol = 0.001  # tolerance
+    max_iter = 40  # maximum iterations for GN
+
+    for i, row in enumerate(data):
+        print("row ",i,": ",row)
+        least_squares_GN(p_anchor, np.array([5, 5]), row, max_iter, tol)
+        if i == 0:
+            break;
 	# TODO calculate error measures and create plots----------------
     pass
 #--------------------------------------------------------------------------------
@@ -164,7 +167,54 @@ def least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol):
         measurements_n... distance_estimate, nr_anchors x 1
         max_iter... maximum number of iterations, scalar
         tol... tolerance value to terminate, scalar"""
-    # TODO
+
+    rows = np.size(measurements_n)
+    cols = np.size(p_start)
+
+    p = p_start # original guess for B
+    p = np.array([3,2]) # original guess for B# original guess for B
+    p = p.T
+    print("init pos:", p)
+    Jf = np.zeros((rows, cols))  # Jacobian matrix from r
+    r = np.zeros((rows, 1))  # r equations
+
+    def distance(p0,p1):
+        assert(p0.shape == (2,))
+        assert(p1.shape == (2,))
+        return np.sqrt(np.power((p0[0]-p1[0]),2)+np.power((p0[1]-p1[1]),2))
+
+    def partialDerX(x,a,comDen):
+        return (x-a)/comDen;
+
+    def partialDerY(y,b,comDen):
+        return (y-b)/comDen;
+
+    for it_nr in range(max_iter):
+        # calculate Jr and r for this iteration.
+        for j in range(rows):
+            print()
+            print("Anchor", j)
+            #commonDenom = partialDerCommonDenom(p[0], p[1], p_anchor[j,0], p_anchor[j,1] )
+            commonDenom = distance(p, p_anchor[j])
+            print("p, p_anchor[j]", p, p_anchor[j])
+            print("commonDenom", commonDenom)
+            assert(commonDenom != 0)
+            print("p[0], p_anchor[j,0], commonDenom",p[0], p_anchor[j,0], commonDenom)
+            Jf[j, 0] = partialDerX(p[0], p_anchor[j,0], commonDenom)
+            print("p[1], p_anchor[j,1], commonDenom",p[1], p_anchor[j,1], commonDenom)
+            Jf[j, 1] = partialDerY(p[1], p_anchor[j,1], commonDenom)
+            print("measurements_n[j], norm(p_anchor[j]-p)",measurements_n[j], distance(p_anchor[j],p))
+            print("measurements_n[j] - norm(p_anchor[j]-p)",measurements_n[j] - distance(p_anchor[j],p))
+            r[j, 0] = measurements_n[j] - distance(p, p_anchor[j])
+
+        print("r", r)
+        Jft = Jf.T
+        p = p - np.dot(np.dot(inv(np.dot(Jft, Jf)), Jft), r).reshape(2,)
+
+        print(np.shape(p))
+        print("new p(",it_nr,")", p)
+        assert (np.shape(p) == (2,))
+        #input()
     pass
     
 #--------------------------------------------------------------------------------
