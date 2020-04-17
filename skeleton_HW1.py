@@ -37,7 +37,7 @@ def main():
     
     #1) ML estimation of model parameters
     #TODO 
-    params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
+    #params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
     
     #2) Position estimation using least squares
     #TODO
@@ -127,11 +127,22 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
     tol = 0.001  # tolerance
     max_iter = 40  # maximum iterations for GN
 
+    fig, axs = plt.subplots(2)
+    fig.suptitle('Distance from converging point')
     for i, row in enumerate(data):
         print("row ",i,": ",row)
-        least_squares_GN(p_anchor, np.array([5, 5]), row, max_iter, tol)
-        if i == 0:
+        random_init_pos = np.random.uniform(-5, 5, 2)
+        least_squares_GN(p_anchor, random_init_pos, row, max_iter, tol, axs)
+        if i == 200:
             break;
+
+    plt.yscale("log")
+    plt.xlabel("x/m")
+    plt.ylabel("y/m")
+    plt.ylabel("y/m log")
+
+    plt.show()
+
 	# TODO calculate error measures and create plots----------------
     pass
 #--------------------------------------------------------------------------------
@@ -159,7 +170,7 @@ def position_estimation_bayes(data,nr_anchors,p_anchor,prior_mean,prior_cov,lamb
     # TODO
     pass
 #--------------------------------------------------------------------------------
-def least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol):
+def least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol, axs):
     """ apply Gauss Newton to find the least squares solution
     Input:
         p_anchor... position of anchors, nr_anchors x 2
@@ -172,9 +183,9 @@ def least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol):
     cols = np.size(p_start)
 
     p = p_start # original guess for B
-    p = np.array([3,2]) # original guess for B# original guess for B
+    #p = np.array([30,20]) # original guess for B# original guess for B
     p = p.T
-    print("init pos:", p)
+    #print("init pos:", p)
     Jf = np.zeros((rows, cols))  # Jacobian matrix from r
     r = np.zeros((rows, 1))  # r equations
 
@@ -184,39 +195,40 @@ def least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol):
         return np.sqrt(np.power((p0[0]-p1[0]),2)+np.power((p0[1]-p1[1]),2))
 
     def partialDerX(x,a,comDen):
-        return (x-a)/comDen;
+        return (a-x)/comDen;
 
     def partialDerY(y,b,comDen):
-        return (y-b)/comDen;
-
+        return (b-y)/comDen;
+    line = []
     for it_nr in range(max_iter):
         # calculate Jr and r for this iteration.
         for j in range(rows):
-            print()
-            print("Anchor", j)
-            #commonDenom = partialDerCommonDenom(p[0], p[1], p_anchor[j,0], p_anchor[j,1] )
+            #print()
+            #print("Anchor", j)
             commonDenom = distance(p, p_anchor[j])
-            print("p, p_anchor[j]", p, p_anchor[j])
-            print("commonDenom", commonDenom)
             assert(commonDenom != 0)
-            print("p[0], p_anchor[j,0], commonDenom",p[0], p_anchor[j,0], commonDenom)
             Jf[j, 0] = partialDerX(p[0], p_anchor[j,0], commonDenom)
-            print("p[1], p_anchor[j,1], commonDenom",p[1], p_anchor[j,1], commonDenom)
             Jf[j, 1] = partialDerY(p[1], p_anchor[j,1], commonDenom)
-            print("measurements_n[j], norm(p_anchor[j]-p)",measurements_n[j], distance(p_anchor[j],p))
-            print("measurements_n[j] - norm(p_anchor[j]-p)",measurements_n[j] - distance(p_anchor[j],p))
             r[j, 0] = measurements_n[j] - distance(p, p_anchor[j])
 
-        print("r", r)
         Jft = Jf.T
         p = p - np.dot(np.dot(inv(np.dot(Jft, Jf)), Jft), r).reshape(2,)
 
-        print(np.shape(p))
-        print("new p(",it_nr,")", p)
+        #print("new p(",it_nr,")", p)
         assert (np.shape(p) == (2,))
-        #input()
-    pass
-    
+
+        line.append(p)
+        pass
+
+    lll = []
+    for point in line:
+        lll.append(distance(p, point))
+
+    random_color = np.random.rand(3,)
+    axs[0].plot(lll, c=random_color,linewidth=1, markersize=2, alpha=0.4)
+    axs[1].plot(lll, c=random_color,linewidth=1, markersize=2, alpha=0.4)
+
+
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 # Helper Functions
