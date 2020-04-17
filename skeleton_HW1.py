@@ -122,15 +122,14 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
         p_anchor... position of anchors, nr_anchors x 2 
         p_true... true position (needed to calculate error) 2x2 
         use_exponential... determines if the exponential anchor in scenario 2 is used, bool"""
-    nr_samples = np.size(data,0)
     
-    tol = 0.001  # tolerance
+    tol = 0.00000001  # tolerance
     max_iter = 40  # maximum iterations for GN
 
     fig, axs = plt.subplots(2)
     fig.suptitle('Distance from converging point')
     for i, row in enumerate(data):
-        print("row ",i,": ",row)
+        #print("row ",i,": ",row)
         random_init_pos = np.random.uniform(-5, 5, 2)
         least_squares_GN(p_anchor, random_init_pos, row, max_iter, tol, axs)
         if i == 200:
@@ -138,7 +137,6 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
 
     plt.yscale("log")
     plt.xlabel("x/m")
-    plt.ylabel("y/m")
     plt.ylabel("y/m log")
 
     plt.show()
@@ -199,35 +197,35 @@ def least_squares_GN(p_anchor,p_start, measurements_n, max_iter, tol, axs):
 
     def partialDerY(y,b,comDen):
         return (b-y)/comDen;
-    line = []
-    for it_nr in range(max_iter):
-        # calculate Jr and r for this iteration.
-        for j in range(rows):
+    points = []
+    for iteration in range(max_iter):
+        for anchor in range(rows):
             #print()
-            #print("Anchor", j)
-            commonDenom = distance(p, p_anchor[j])
+            #print("Anchor", anchor)
+            commonDenom = distance(p, p_anchor[anchor])
             assert(commonDenom != 0)
-            Jf[j, 0] = partialDerX(p[0], p_anchor[j,0], commonDenom)
-            Jf[j, 1] = partialDerY(p[1], p_anchor[j,1], commonDenom)
-            r[j, 0] = measurements_n[j] - distance(p, p_anchor[j])
+            Jf[anchor, 0] = partialDerX(p[0], p_anchor[anchor,0], commonDenom)
+            Jf[anchor, 1] = partialDerY(p[1], p_anchor[anchor,1], commonDenom)
+            r[anchor, 0] = measurements_n[anchor] - distance(p, p_anchor[anchor])
 
         Jft = Jf.T
+        p_old = p
         p = p - np.dot(np.dot(inv(np.dot(Jft, Jf)), Jft), r).reshape(2,)
-
-        #print("new p(",it_nr,")", p)
         assert (np.shape(p) == (2,))
+        points.append(p)
 
-        line.append(p)
+        if distance(p_old, p)<tol:
+            break;
         pass
 
-    lll = []
-    for point in line:
-        lll.append(distance(p, point))
-
+    line = []
+    for point in points:
+        line.append(distance(p, point))
     random_color = np.random.rand(3,)
-    axs[0].plot(lll, c=random_color,linewidth=1, markersize=2, alpha=0.4)
-    axs[1].plot(lll, c=random_color,linewidth=1, markersize=2, alpha=0.4)
+    axs[0].plot(line, c=random_color,linewidth=1, markersize=2, alpha=0.4)
+    axs[1].plot(line, c=random_color,linewidth=1, markersize=2, alpha=0.4)
 
+    return p
 
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
