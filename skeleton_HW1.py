@@ -42,41 +42,50 @@ def task(scenario):
     nr_samples = np.size(data,0)
     
     #1) ML estimation of model parameters
-    #TODO 
-    #params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
+    if False:
+        params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
     
     #2) Position estimation using least squares
-    pad_far = 5
-    pad_near = 0.5
-    if (scenario == 1):
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_far)
-        plot_anchors_and_agent(nr_anchors, p_anchor, p_true)
-        #plt.show()
-        plt.savefig('sc1_gn_far.svg')
+    if True: # to disable set False
+        pad_far = 4
+        pad_near = 0.5
+        if (scenario == 1):
+            position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_far)
+            plot_anchors_and_agent(nr_anchors, p_anchor, p_true)
+            plt.savefig('sc1_gn_far.png')
 
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_near)
-        #plt.show()
-        plt.savefig('sc1_gn_near.svg')
+            p_ls = position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_near)
+            plt.savefig('sc1_gn_near.png')
 
-    if(scenario == 2):
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, False, "Position estimation, scenario "+str(scenario)+" without exp. anchor",pad=pad_far)
-        plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref, use_exp=False)
-        plt.savefig('sc2_gn_far_wo_exp.svg')
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, False, "Position estimation, scenario "+str(scenario)+" without exp. anchor",pad=pad_near)
-        plt.savefig('sc2_gn_near_wo_exp.svg')
+            calc_cdf(p_ls, p_true, scenario, "sc1_gn_cdf.png")
 
 
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario)+" with exp. anchor",pad=pad_far)
-        plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref, use_exp=True)
-        plt.savefig('sc2_gn_far_w_exp.svg')
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario)+" with exp. anchor",pad=pad_near)
-        plt.savefig('sc2_gn_near_w_exp.svg')
-    if (scenario == 3):
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_far)
-        plot_anchors_and_agent(nr_anchors, p_anchor, p_true)
-        plt.savefig('sc3_gn_far.svg')
-        position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_near)
-        plt.savefig('sc3_gn_near.svg')
+        if(scenario == 2):
+            position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, False, "Position estimation, scenario "+str(scenario)+" without exp. anchor",pad=pad_far)
+            plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref, use_exp=False)
+            plt.savefig('sc2_gn_far_wo_exp.png')
+            p_ls = position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, False, "Position estimation, scenario "+str(scenario)+" without exp. anchor",pad=pad_near)
+            plt.savefig('sc2_gn_near_wo_exp.png')
+            calc_cdf(p_ls, p_true, str(scenario)+" without exp. anchor", "sc2_gn_cdf_wo_exp.png")
+
+            position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario)+" with exp. anchor",pad=pad_far)
+            plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref, use_exp=True)
+            plt.savefig('sc2_gn_far_w_exp.png')
+
+            p_ls = position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario)+" with exp. anchor",pad=pad_near)
+            plt.savefig('sc2_gn_near_w_exp.png')
+            calc_cdf(p_ls, p_true, str(scenario)+" with exp. anchor", "sc2_gn_cdf_w_exp.png")
+
+        if (scenario == 3):
+            position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_far)
+            plot_anchors_and_agent(nr_anchors, p_anchor, p_true)
+            plt.savefig('sc3_gn_far.png')
+
+            p_ls = position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_near)
+            plt.savefig('sc3_gn_near.png')
+
+            calc_cdf(p_ls, p_true, scenario, "sc3_gn_cdf.png")
+
 
     if(scenario == 3):
         # TODO: don't forget to plot joint-likelihood function for the first measurement
@@ -95,6 +104,27 @@ def task(scenario):
     pass
 
 #--------------------------------------------------------------------------------
+
+def calc_cdf(p_calc, p_true, title, filename):
+    def distance(p0,p1):
+        assert(p0.shape == (2,))
+        assert(p1.shape == (2,))
+        return np.sqrt(np.power((p0[0]-p1[0]),2) + np.power((p0[1]-p1[1]),2))
+    error = []
+    for p in p_calc:
+        error.append(distance(p, p_true.T.reshape(2, )))
+
+    print(filename +" mean:"+ str(round(np.mean(error),6)) +", var: "+ str(round(np.var(error),6)))
+
+    #plot cdf
+    Fx, x = ecdf(np.array(error))
+    plt.clf()
+    plt.plot(x, Fx)
+    plt.title("Cumulative distribution, scenario "+str(title))
+    plt.xlabel("Error/m")
+    plt.ylabel("Probability")
+    plt.savefig(filename)
+
 #--------------------------------------------------------------------------------
 def parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref):
     """ estimate the model parameters for all 4 anchors based
@@ -168,7 +198,7 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
     p_ls = []
     for i, row in enumerate(data):
         random_init_pos = np.random.uniform(-5, 5, 2)
-        if not use_exponential:
+        if use_exponential:
             ls = least_squares_GN(p_anchor, random_init_pos, row, max_iter, tol, axs)
         else:
             ls = least_squares_GN(p_anchor[1:], random_init_pos, row[1:], max_iter, tol, axs)
@@ -199,7 +229,8 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
     def cov_mat(X):
         return np.array([[cov(X[0], X[0]), cov(X[0], X[1])], [cov(X[1], X[0]), cov(X[1], X[1])]])
 
-    cov_matrix = np.sqrt(cov_mat(p_ls.T))
+    #cov_matrix = np.sqrt(cov_mat(p_ls.T))
+    cov_matrix = np.cov(p_ls.T) #np.sqrt(cov_mat(p_ls.T))
 
     y_min = np.min(p_ls.T[1])
     x_min = np.min(p_ls.T[0])
@@ -211,11 +242,10 @@ def position_estimation_least_squares(data,nr_anchors,p_anchor, p_true, use_expo
         plt.plot(p[0], p[1], 'b+', markersize = 1, alpha = 1)
     plot_gauss_contour(p_mu, cov_matrix, x_min-pad, x_max+pad, y_min-pad, y_max+pad, title)
 
-    plt.plot(p_true[0, 0], p_true[0, 1], 'gx')
-    plt.text(p_true[0, 0] + 0.02, p_true[0, 1] + 0.02, r'$p_{true}$')
+    plt.plot(p_true[0, 0], p_true[0, 1], 'gx', zorder = 100)
+    plt.text(p_true[0, 0] + 0.02, p_true[0, 1] + 0.02, r'$p_{true}$', zorder = 100)
 
-    # TODO calculate error measures and create plots----------------
-    pass
+    return p_ls
 #--------------------------------------------------------------------------------
 def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
     """ estimate the position by using a numerical maximum likelihood estimator
@@ -323,6 +353,8 @@ def plot_gauss_contour(mu,cov,xmin,xmax,ymin,ymax,title="Title"):
     CS = plt.contour(X, Y, Z.pdf(pos),3,colors='r', alpha = 0.8,zorder=100)
     plt.clabel(CS, inline=1, fontsize=10)
     plt.title(title)
+    plt.xlabel("x/m")
+    plt.ylabel("y/m")
     #plt.show()
     return
 
