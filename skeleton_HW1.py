@@ -13,7 +13,7 @@ from numpy.linalg import inv, norm  #for GN method
 def main():
     
     # choose the scenario
-    scenario = 1    # all anchors are Gaussian
+    scenario = 3    # all anchors are Gaussian
     #scenario = 2    # 1 anchor is exponential, 3 are Gaussian
     #scenario = 3    # all anchors are exponential
     
@@ -37,7 +37,7 @@ def main():
     
     #1) ML estimation of model parameters
     #TODO 
-    #params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
+    params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
     
     #2) Position estimation using least squares
     #TODO
@@ -49,6 +49,8 @@ def main():
         #3) Postion estimation using numerical maximum likelihood
         #TODO
         position_estimation_numerical_ml(data,nr_anchors,p_anchor, params, p_true)
+
+
     
         #4) Position estimation with prior knowledge (we roughly know where to expect the agent)
         #TODO
@@ -152,7 +154,129 @@ def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
         p_anchor... position of anchors, nr_anchors x 2 
         lambdas... estimated parameters (scenario 3), nr_anchors x 1
         p_true... true position (needed to calculate error), 2x2 """
+
     #TODO
+
+    ##################################################################################
+    #Single Measurement
+    p_high = np.zeros(3)
+    p = 0.0
+    p_array = np.zeros(shape=(200,200))
+
+    y_counter = 0
+
+    for y in np.arange(-5.0, 5.0, 0.05):
+
+        x_counter = 0
+
+        for x in np.arange( -5.0, 5.0, 0.05):
+            d_0 = np.sqrt(((5 - x) ** 2)  + ((5 - y) ** 2))
+            d_1 = np.sqrt(((-5 - x) ** 2)  + ((5 - y) ** 2))
+            d_2 = np.sqrt(((-5 - x) ** 2)  + ((-5 - y) ** 2))
+            d_3 = np.sqrt(((5 - x) ** 2)  + ((-5 - y) ** 2))
+
+            if data[0,0] >= d_0:
+                p_0 = lambdas[2, 0] * np.exp(-lambdas[2, 0] * (data[0,0] - d_0))
+            else:
+                p_0 = 0.0
+            
+            if data[0,1] >= d_1:
+                p_1 = lambdas[2, 1] * np.exp(-lambdas[2, 1] * (data[0,1] - d_1))
+            else:
+                p_1 = 0.0
+
+            if data[0,2] >= d_2:
+                p_2 = lambdas[2, 2] * np.exp(-lambdas[2, 2] * (data[0,2] - d_2))
+            else:
+                p_2 = 0.0
+
+            if data[0,3] >= d_3:
+                p_3 = lambdas[2, 3] * np.exp(-lambdas[2, 3] * (data[0,3] - d_3))
+            else:
+                p_3 = 0.0
+
+            p = p_0 * p_1 * p_2 * p_3
+           
+            p_array[y_counter][x_counter] = p
+
+            x_counter += 1
+            
+
+            if(p > p_high[0]):
+                p_high = [p, x, y]
+
+        y_counter += 1
+
+    print(p_high)
+
+    x = np.array(np.arange(-5, 5, 0.05))
+    y = np.array(np.arange(-5, 5, 0.05))
+    plt.contourf(x, y, p_array)
+
+    plt.show()
+
+    p_calculated = np.array([[p_high[1],p_high[2]]])
+
+    plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_calculated)
+
+    ##############################################################################
+    #Multiple Measurement
+
+    plt.axis([-6, 6, -6, 6])
+    
+    p = 0.0
+    p_array = np.zeros(shape=(200,200))
+
+    for dataCount in range(0, len(data)):
+
+        p_high = np.zeros(3)
+        for y in np.arange(-5.0, 5.0, 0.05):
+
+            for x in np.arange( -5.0, 5.0, 0.05):
+                d_0 = np.sqrt(((5 - x) ** 2)  + ((5 - y) ** 2))
+                d_1 = np.sqrt(((-5 - x) ** 2)  + ((5 - y) ** 2))
+                d_2 = np.sqrt(((-5 - x) ** 2)  + ((-5 - y) ** 2))
+                d_3 = np.sqrt(((5 - x) ** 2)  + ((-5 - y) ** 2))
+
+                if data[dataCount,0] >= d_0:
+                    p_0 = lambdas[2, 0] * np.exp(-lambdas[2, 0] * (data[dataCount,0] - d_0))
+                else:
+                    p_0 = 0.0
+                
+                if data[dataCount,1] >= d_1:
+                    p_1 = lambdas[2, 1] * np.exp(-lambdas[2, 1] * (data[dataCount,1] - d_1))
+                else:
+                    p_1 = 0.0
+
+                if data[dataCount,2] >= d_2:
+                    p_2 = lambdas[2, 2] * np.exp(-lambdas[2, 2] * (data[dataCount,2] - d_2))
+                else:
+                    p_2 = 0.0
+
+                if data[dataCount,3] >= d_3:
+                    p_3 = lambdas[2, 3] * np.exp(-lambdas[2, 3] * (data[dataCount,3] - d_3))
+                else:
+                    p_3 = 0.0
+
+                p = p_0 * p_1 * p_2 * p_3
+                
+                if(p > p_high[0]):
+                    p_high = [p, x, y]
+
+        #p_calculated = np.array([[p_high[1],p_high[2]]])
+        print(dataCount)
+        plt.plot(p_high[1], p_high[2], 'go')
+
+
+    for i in range(0, nr_anchors):
+        plt.plot(p_anchor[i, 0], p_anchor[i, 1], 'bo')
+        plt.text(p_anchor[i, 0] + 0.2, p_anchor[i, 1] + 0.2, r'$p_{a,' + str(i) + '}$')
+    plt.plot(p_true[0, 0], p_true[0, 1], 'r*')
+    plt.text(p_true[0, 0] + 0.2, p_true[0, 1] + 0.2, r'$p_{true}$')
+
+    plt.xlabel("x/m")
+    plt.ylabel("y/m")
+    plt.show()
     pass
 #--------------------------------------------------------------------------------
 def position_estimation_bayes(data,nr_anchors,p_anchor,prior_mean,prior_cov,lambdas, p_true):
