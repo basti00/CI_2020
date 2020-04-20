@@ -43,11 +43,11 @@ def task(scenario):
     nr_samples = np.size(data,0)
     
     #1) ML estimation of model parameters
-    if False:
+    if True:
         params = parameter_estimation(reference_measurement,nr_anchors,p_anchor,p_ref)
     
     #2) Position estimation using least squares
-    if True: # to disable set False
+    if False: # to disable set False
         pad_far = 4
         pad_near = 0.5
         if (scenario == 1):
@@ -258,7 +258,6 @@ def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
         p_true... true position (needed to calculate error), 2x2 """
 
     #TODO
-
     ##################################################################################
     #Single Measurement
     p_high = np.zeros(3)
@@ -320,7 +319,7 @@ def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
     p_calculated = np.array([[p_high[1],p_high[2]]])
 
     plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_calculated)
-
+    
     ##############################################################################
     #Multiple Measurement
 
@@ -328,6 +327,9 @@ def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
     
     p = 0.0
     p_array = np.zeros(shape=(200,200))
+
+    x_all = 0.0
+    y_all = 0.0
 
     for dataCount in range(0, len(data)):
 
@@ -365,9 +367,10 @@ def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
                 if(p > p_high[0]):
                     p_high = [p, x, y]
 
-        #p_calculated = np.array([[p_high[1],p_high[2]]])
-        print(dataCount)
+        #print(dataCount)
         plt.plot(p_high[1], p_high[2], 'go')
+        x_all += p_high[1]
+        y_all += p_high[2]
 
 
     for i in range(0, nr_anchors):
@@ -375,6 +378,14 @@ def position_estimation_numerical_ml(data,nr_anchors,p_anchor, lambdas, p_true):
         plt.text(p_anchor[i, 0] + 0.2, p_anchor[i, 1] + 0.2, r'$p_{a,' + str(i) + '}$')
     plt.plot(p_true[0, 0], p_true[0, 1], 'r*')
     plt.text(p_true[0, 0] + 0.2, p_true[0, 1] + 0.2, r'$p_{true}$')
+
+    x_all = x_all / len(data)
+    y_all = y_all / len(data)
+
+    plt.plot(x_all, y_all, 'r*')
+    plt.text(x_all + 0.2, y_all + 0.2, r'$p_{final}$')
+
+
 
     plt.xlabel("x/m")
     plt.ylabel("y/m")
@@ -524,14 +535,14 @@ def plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref=None, use_exp=Tru
         if use_exp or (not use_exp and i!=0):
             plt.plot(p_anchor[i, 0], p_anchor[i, 1], 'bo')
             plt.text(p_anchor[i, 0] + 0.2, p_anchor[i, 1] + 0.2, r'$p_{a,' + str(i) + '}$')
-    #plt.plot(p_true[0, 0], p_true[0, 1], 'g*')
-    #plt.text(p_true[0, 0] + 0.2, p_true[0, 1] + 0.2, r'$p_{true}$')
+    plt.plot(p_true[0, 0], p_true[0, 1], 'g*')
+    plt.text(p_true[0, 0] + 0.2, p_true[0, 1] + 0.2, r'$p_{true}$')
     if p_ref is not None:
         plt.plot(p_ref[0, 0], p_ref[0, 1], 'r*')
         plt.text(p_ref[0, 0] + 0.2, p_ref[0, 1] + 0.2, '$p_{ref}$')
     plt.xlabel("x/m")
     plt.ylabel("y/m")
-    #plt.show()
+    plt.show()
     pass
 
 #--------------------------------------------------------------------------------
