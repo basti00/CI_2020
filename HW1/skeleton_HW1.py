@@ -67,7 +67,7 @@ def task(scenario):
             plt.savefig('sc2_gn_far_wo_exp.png')
             p_ls = position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, False, "Position estimation, scenario "+str(scenario)+" without exp. anchor",pad=pad_near)
             plt.savefig('sc2_gn_near_wo_exp.png')
-            calc_cdf(p_ls, p_true, str(scenario)+" without exp. anchor", "sc2_gn_cdf_wo_exp.png")
+            calc_cdf(p_ls, p_true, str(scenario) +" without exp. anchor", "sc2_gn_cdf_wo_exp.png")
 
             position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario)+" with exp. anchor",pad=pad_far)
             plot_anchors_and_agent(nr_anchors, p_anchor, p_true, p_ref, use_exp=True)
@@ -75,7 +75,7 @@ def task(scenario):
 
             p_ls = position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario)+" with exp. anchor",pad=pad_near)
             plt.savefig('sc2_gn_near_w_exp.png')
-            calc_cdf(p_ls, p_true, str(scenario)+" with exp. anchor", "sc2_gn_cdf_w_exp.png")
+            calc_cdf(p_ls, p_true, str(scenario) +" with exp. anchor", "sc2_gn_cdf_w_exp.png")
 
         if (scenario == 3):
             position_estimation_least_squares(data, nr_anchors, p_anchor, p_true, True, "Position estimation, scenario "+str(scenario),pad=pad_far)
