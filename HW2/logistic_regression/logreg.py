@@ -39,9 +39,28 @@ def cost(theta, x, y):
 
     c = 0
 
+    epsilon = 1e-20
+
+    for i in np.arange(N):
+        z = np.dot(theta, x[i])
+
+        sigmund = sig(z)
+
+        y_num = 0
+        if(y[i] == True):
+            y_num = 1
+
+        c += y_num * np.log(sigmund + epsilon) + (1 - y_num) * np.log(1 - sigmund + epsilon)
+
+
+    c = c / N
+    c = -c
+
     # END TODO
     ###########
 
+    print("Cost Function:")
+    print(c)
     return c
 
 
