@@ -41,14 +41,14 @@ def design_matrix(x, degree):
     #
     # TIP: use the power function from numpy
 
-    X = x  # TODO: change me
+    X = np.tile(x.T, (degree+1, 1)).T
+    X = np.power(X, np.arange(degree+1))
 
     #
     # END TODO
     ######################
 
     return X
-
 
 def train(x, y, degree):
     """
@@ -76,10 +76,14 @@ def train(x, y, degree):
     #  - To compute the pseudo inverse (A*A.T)^-1 * A.T with a more stable algorithm numpy provides the function pinv
     #   pinv is accessible in the sub-library numpy.linalg
     #
+    theta_opt = []
 
-    theta_opt = np.zeros(degree + 1)  # TODO: Change me
+    X = design_matrix(x, degree)
+    inv = np.linalg.pinv(X.T.dot(X))
+    temp  = inv.dot(X.T).dot(y)
+    theta_opt.append(temp)
 
-    # END TODO
+        # END TODO
     ######################
 
     return theta_opt
