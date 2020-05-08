@@ -76,12 +76,9 @@ def train(x, y, degree):
     #  - To compute the pseudo inverse (A*A.T)^-1 * A.T with a more stable algorithm numpy provides the function pinv
     #   pinv is accessible in the sub-library numpy.linalg
     #
-    theta_opt = []
-
     X = design_matrix(x, degree)
     inv = np.linalg.pinv(X.T.dot(X))
-    temp  = inv.dot(X.T).dot(y)
-    theta_opt.append(temp)
+    theta_opt  = inv.dot(X.T).dot(y)
 
         # END TODO
     ######################
@@ -114,8 +111,10 @@ def compute_error(theta, degree, x, y):
     #               Then * becomes a matrix multiplication
     #
     #  - One can use the numpy function mean
+    for deg in range(degree+1):
+        pass
 
-    err = -1  # TODO: Change me
+    err = 0  # TODO: Change me
 
     #
     # END TODO
