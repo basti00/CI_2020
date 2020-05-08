@@ -111,10 +111,9 @@ def compute_error(theta, degree, x, y):
     #               Then * becomes a matrix multiplication
     #
     #  - One can use the numpy function mean
-    for deg in range(degree+1):
-        pass
-
-    err = 0  # TODO: Change me
+    X = design_matrix(x,degree)
+    temp = np.linalg.norm(X.dot(theta) - y) ** 2
+    err = 1 / y.shape[0] * temp
 
     #
     # END TODO

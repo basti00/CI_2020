@@ -51,9 +51,7 @@ def main():
     # TIPs:
     # - use the argmin function of numpy
     # - the code above is already giving the vectors of errors
-    i_best = 0 
-    
-    # TODO: Change this
+    i_best = np.argmin(mse_val)
     best_degree = degrees[i_best]
     best_theta = theta_list[i_best]
     #
