@@ -110,6 +110,7 @@ def plot_logreg(data, degree, theta, E_list):
 
 def check_gradient(f, df, n, tries=1, deltas=(1e-2, 1e-4, 1e-6)):
     # Init around the point x0
+    np.random.seed(0); ###############TODO remove before submission!
     x0 = rd.randn(n)
     f0 = f(x0)
     g0 = df(x0)
