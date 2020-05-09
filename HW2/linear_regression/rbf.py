@@ -2,6 +2,8 @@
 import numpy as np
 from numpy.linalg import pinv
 
+import math
+
 """
 Assignment: Linear and Logistic Regression
 Section: Linear Regression with radial basis functions
@@ -31,9 +33,8 @@ def get_centers_and_sigma(n_centers):
     # TIPs:
     #   - Use the linspace function from numpy
     #
-
-    centers = np.zeros(n_centers)  # TODO: Change me
-    sigma = 1.  # TODO: Change me
+    centers = np.linspace(-1,1,n_centers)
+    sigma = 2 / n_centers
 
     # END TODO
     ######################
@@ -69,8 +70,17 @@ def design_matrix(x, centers, sigma):
     #
     # TIP: don't forget that the first column has only ones
     #
+    # x = np.array([0,1,2])
+    # centers = np.array([0,1])
+    # sigma = 1 / math.sqrt(2)
 
-    res = x  # TODO: Change me
+
+    X = np.zeros((centers.size+1,x.size))
+    X[0] = np.ones((x.size))
+    for i, center in enumerate(centers):
+        X[i+1] = np.exp(-np.power(x.T - center, 2) / (2 * np.power(sigma,2)))
+
+    res = X.T
 
     # END TODO
     ######################
@@ -100,8 +110,10 @@ def train(x, y, n_centers):
     #   - Don't forget to first expand the data
     #   - This should not be very different from the solution you provided in poly.py
     #
-
-    theta_opt = np.zeros(n_centers + 1)  # TODO: Change me
+    centers, sigma = get_centers_and_sigma(n_centers)
+    X = design_matrix(x, centers, sigma)
+    inv = np.linalg.pinv(X.T.dot(X))
+    theta_opt  = inv.dot(X.T).dot(y)
 
     # END TODO
     ######################
@@ -131,8 +143,10 @@ def compute_error(theta, n_centers, x, y):
     #   - Don't forget to first expand the data
     #   - This should not be very different from the solution you provided in poly.py
     #
-
-    err = -1  # TODO: Change me
+    centers, sigma = get_centers_and_sigma(n_centers)
+    X = design_matrix(x, centers, sigma)
+    temp = np.power(np.linalg.norm(X.dot(theta) - y),2)
+    err = 1 / y.shape[0] * temp
 
     # END TODO
     ######################
