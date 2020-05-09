@@ -20,10 +20,7 @@ def cost(theta, x, y):
     :return: cost
     """
     N, n = x.shape
-
     ##############
-    #
-    # TODO
     #
     # Write the cost of logistic regression as defined in the lecture
     # Hint:
@@ -35,32 +32,19 @@ def cost(theta, x, y):
     #   implementations are more or less sensible to this issue, you
     #   may try another one. A (dirty) trick is to replace log(x) with
     #   log(x + epsilon) with epsilon a very small number like 1e-20
-    #   or 1e-10 but the gradients might not be exact anymore. 
-
+    #   or 1e-10 but the gradients might not be exact anymore.
     c = 0
-
     epsilon = 1e-20
-
     for i in np.arange(N):
         z = np.dot(theta, x[i])
-
-        sigmund = sig(z)
-
+        sigmoid = sig(z)
         y_num = 0
         if(y[i] == True):
             y_num = 1
-
-        c += y_num * np.log(sigmund) + (1 - y_num) * np.log(1 - sigmund)
-
-
+        c += y_num * np.log(sigmoid) + (1 - y_num) * np.log(1 - sigmoid)
     c = c / N
     c = -c
 
-    # END TODO
-    ###########
-
-    print("Cost Function:")
-    print(c)
     return c
 
 
@@ -76,35 +60,17 @@ def grad(theta, x, y):
     """
     N, n = x.shape
 
-    ##############
-    #
-    # TODO
-    #
-    #   - prefer numpy vectorized operations over for loops
+    #  TODO - prefer numpy vectorized operations over for loops
 
     g = np.zeros(theta.shape)
-
-
     for gradCounter in np.arange(len(theta)):
-
         g_temp = 0
-
         for i in np.arange(N):
             z = np.dot(theta, x[i])
-            sigmund = sig(z)
-
+            sigmoid = sig(z)
             y_num = 0
             if(y[i] == True):
                 y_num = 1
-
-            g_temp += (sigmund - y_num) * x[i][gradCounter]
-
-        g[gradCounter] = g_temp
-        print("G: ")
-        print(g_temp)
-
-
-    # END TODO
-    ###########
-
+            g_temp += (sigmoid - y_num) * x[i][gradCounter]
+        g[gradCounter] = g_temp / N;
     return g
