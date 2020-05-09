@@ -50,7 +50,7 @@ def cost(theta, x, y):
         if(y[i] == True):
             y_num = 1
 
-        c += y_num * np.log(sigmund + epsilon) + (1 - y_num) * np.log(1 - sigmund + epsilon)
+        c += y_num * np.log(sigmund) + (1 - y_num) * np.log(1 - sigmund)
 
 
     c = c / N
@@ -83,6 +83,26 @@ def grad(theta, x, y):
     #   - prefer numpy vectorized operations over for loops
 
     g = np.zeros(theta.shape)
+
+
+    for gradCounter in np.arange(len(theta)):
+
+        g_temp = 0
+
+        for i in np.arange(N):
+            z = np.dot(theta, x[i])
+            sigmund = sig(z)
+
+            y_num = 0
+            if(y[i] == True):
+                y_num = 1
+
+            g_temp += (sigmund - y_num) * x[i][gradCounter]
+
+        g[gradCounter] = g_temp
+        print("G: ")
+        print(g_temp)
+
 
     # END TODO
     ###########
