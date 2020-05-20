@@ -43,7 +43,7 @@ def ex_1_1_a(x_train, x_test, y_train, y_test):
     """
 
     for n_h in [2, 5, 50]:
-        nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=696969)
+        nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0)
 
         nn.fit(x_train, y_train)
 
@@ -107,14 +107,16 @@ def ex_1_1_c(x_train, x_test, y_train, y_test):
     :return:
     """
 
-    MSE_train, MSE_test = np.ndarray((8,10)), np.ndarray((8,10)) 
+    MSE_train, MSE_test = np.zeros((8,10)), np.zeros((8,10)) 
 
     hiddenN = [1, 2, 4, 6, 8, 12, 20, 40]
+    randoms = np.random.randint(0, 1000, size=10)
+    print(randoms)
 
     for i, n_h in enumerate(hiddenN):
 
-        for j in range(0, 10):
-            nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=69*j)
+        for j, rand in enumerate(randoms):
+            nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=rand)
             nn.fit(x_train, y_train)
 
             MSE_train[i][j] = calculate_mse(nn, x_train, y_train)
