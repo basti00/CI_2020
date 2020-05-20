@@ -111,24 +111,18 @@ def ex_1_1_c(x_train, x_test, y_train, y_test):
     :return:
     """
 
-    MSE_train, MSE_test = np.array([]), np.array([]) 
+    MSE_train, MSE_test = np.ndarray((8,10)), np.ndarray((8,10)) 
 
     hiddenN = [1, 2, 4, 6, 8, 12, 20, 40]
 
-    for n_h in hiddenN:
+    for i, n_h in enumerate(hiddenN):
 
-        innerList_train, innerList_test = np.array([]), np.array([])
-
-
-        for i in range(0, 10):
-            nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=69*i)
+        for j in range(0, 10):
+            nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=69*j)
             nn.fit(x_train, y_train)
 
-            innerList_train = np.append(innerList_train, calculate_mse(nn, x_train, y_train))
-            innerList_test = np.append(innerList_test, calculate_mse(nn, x_test, y_test))
-
-        MSE_train = np.append(MSE_train, innerList_train)
-        MSE_test = np.append(MSE_test, innerList_test)
+            MSE_train[i][j] = calculate_mse(nn, x_train, y_train)
+            MSE_test[i][j]  = calculate_mse(nn, x_test, y_test)
 
     print(MSE_train)
     print(MSE_test)
