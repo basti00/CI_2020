@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error
-from sklearn.neural_network.multilayer_perceptron import MLPRegressor
+from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
 
 from nn_regression_plot import plot_mse_vs_neurons, plot_mse_vs_iterations, \
@@ -24,10 +24,11 @@ def calculate_mse(nn, x, y):
     :param y: The targets
     :return: Training MSE, Testing MSE
     """
-    ## TODO y_predict_test = nn.predict(x_test)
-
-    mse = 0
+    ## TODO 
+    y_predict_test = nn.predict(x)
+    mse = mean_squared_error(y, y_predict_test)
     return mse
+
 
 
 def ex_1_1_a(x_train, x_test, y_train, y_test):
@@ -42,7 +43,7 @@ def ex_1_1_a(x_train, x_test, y_train, y_test):
     """
 
     for n_h in [2, 5, 50]:
-        nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0)
+        nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=696969)
 
         nn.fit(x_train, y_train)
 
@@ -67,6 +68,34 @@ def ex_1_1_b(x_train, x_test, y_train, y_test):
     :return:
     """
 
+    MSE_train, MSE_test = [], []
+
+    for i in range(0, 10):
+        nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(5,), alpha=0, random_state=69*i)
+        nn.fit(x_train, y_train)
+
+        MSE_train.append(calculate_mse(nn, x_train, y_train))
+        MSE_test.append(calculate_mse(nn, x_test, y_test))
+
+    print(MSE_train)
+    print(MSE_test)
+
+    mean_train = np.mean(MSE_train)
+    mean_test = np.mean(MSE_test)
+
+    std_train = np.std(MSE_train)
+    std_test = np.std(MSE_test)
+
+    max_train = np.max(MSE_train)
+    max_test = np.max(MSE_test)
+
+    min_train = np.min(MSE_train)
+    min_test = np.min(MSE_test)
+
+    print(mean_train, std_train, max_train, MSE_train.index(max_train), min_train, MSE_train.index(min_train))
+    print(mean_test, std_test, max_test,MSE_test.index(max_test), min_test, MSE_test.index(min_test))
+
+
     ## TODO
     pass
 
@@ -81,6 +110,31 @@ def ex_1_1_c(x_train, x_test, y_train, y_test):
     :param y_test: The testing targets
     :return:
     """
+
+    MSE_train, MSE_test = np.array([]), np.array([]) 
+
+    hiddenN = [1, 2, 4, 6, 8, 12, 20, 40]
+
+    for n_h in hiddenN:
+
+        innerList_train, innerList_test = np.array([]), np.array([])
+
+
+        for i in range(0, 10):
+            nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(n_h,), alpha=0, random_state=69*i)
+            nn.fit(x_train, y_train)
+
+            innerList_train = np.append(innerList_train, calculate_mse(nn, x_train, y_train))
+            innerList_test = np.append(innerList_test, calculate_mse(nn, x_test, y_test))
+
+        MSE_train = np.append(MSE_train, innerList_train)
+        MSE_test = np.append(MSE_test, innerList_test)
+
+    print(MSE_train)
+    print(MSE_test)
+
+
+    plot_mse_vs_neurons(MSE_train, MSE_test, hiddenN)
 
     ## TODO
     pass
