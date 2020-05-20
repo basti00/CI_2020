@@ -96,10 +96,6 @@ def ex_1_1_b(x_train, x_test, y_train, y_test):
     print(mean_test, std_test, max_test,MSE_test.index(max_test), min_test, MSE_test.index(min_test))
 
 
-    ## TODO
-    pass
-
-
 def ex_1_1_c(x_train, x_test, y_train, y_test):
     """
     Solution for exercise 1.1 c)
@@ -124,14 +120,7 @@ def ex_1_1_c(x_train, x_test, y_train, y_test):
             MSE_train[i][j] = calculate_mse(nn, x_train, y_train)
             MSE_test[i][j]  = calculate_mse(nn, x_test, y_test)
 
-    print(MSE_train)
-    print(MSE_test)
-
-
     plot_mse_vs_neurons(MSE_train, MSE_test, hiddenN)
-
-    ## TODO
-    pass
 
 
 def ex_1_1_d(x_train, x_test, y_train, y_test):
