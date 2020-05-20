@@ -1,6 +1,6 @@
 from sklearn.metrics import confusion_matrix, mean_squared_error
 
-from sklearn.neural_network.multilayer_perceptron import MLPClassifier
+from sklearn.neural_network import MLPClassifier
 from nn_classification_plot import plot_hidden_layer_weights, plot_boxplot, plot_image
 import numpy as np
 
@@ -24,6 +24,52 @@ def ex_2_1(X_train, y_train, X_test, y_test):
     :param y_test: Targets for the test set
     :return:
     """
-    
+
+    randomSeed = np.random.randint(1, 100, 1)
+
+    n_hidd = [1,10,100]
+
+    score_train, score_test = [], []
+
+    best_score = 0
+
+    bestNetwork = MLPClassifier()
+
+    classes = ["T-shirt/top", "trousers/pants", "pullover shirt", "dress", "coat", "sandal", "shirt", "sneaker", "bag", "ankle boot"]
+
+    for n, n_h in enumerate(n_hidd):
+        for s, seed in enumerate(randomSeed):
+            nn = MLPClassifier(hidden_layer_sizes=(n_h,), activation='tanh', max_iter=50, random_state=seed)
+
+            nn.fit(X_train, y_train)
+
+            scoretrain = nn.score(X_train, y_train)
+            scoretest = nn.score(X_test, y_test)
+
+            score_train.append(scoretrain)
+            score_test.append(scoretest)
+
+            if scoretest > best_score:
+                bestNetwork = nn
+
+            print(100 / (len(n_hidd) * len(randomSeed)) * ((n*len(randomSeed)) + (s+1)), "%")
+
+            
+    plot_boxplot(score_train, score_test)
+
+
+    prediction = bestNetwork.predict(X_test)
+    confusionMatrix = confusion_matrix(y_test, prediction)
+
+    print("Confusion matrix:")
+    print(classes)
+    print(confusionMatrix)
+
+    print("Weights:")
+    print(bestNetwork.coefs_[0])
+
+    print("Difference")
+    print(prediction == y_test)
+
     ## TODO
     pass
