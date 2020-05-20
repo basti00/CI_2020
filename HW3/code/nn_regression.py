@@ -165,5 +165,19 @@ def ex_1_2(x_train, x_test, y_train, y_test):
     :param y_test: The testing targets
     :return:
     """
-    ## TODO
-    pass
+
+    alphas = [10**-6, 10**-5, 10**-4, 10**-3, 10**-2, 10**-1, 1, 10, 100]
+    randoms = np.random.randint(0, 1000, size=10)
+
+    MSE_train, MSE_test = np.ndarray((len(alphas),len(randoms))), np.ndarray((len(alphas),len(randoms)))
+    n_h = 50
+    for a, alpha in enumerate(alphas):
+        for r, random in enumerate(randoms):
+            nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000,
+                              hidden_layer_sizes=(n_h,), alpha=alpha, random_state=random)
+            nn.fit(x_train, y_train)
+            MSE_train[a][r] = calculate_mse(nn, x_train, y_train)
+            MSE_test[a][r] = calculate_mse(nn, x_test, y_test)
+
+    plot_mse_vs_alpha(MSE_train, MSE_test, alphas)
+
