@@ -70,7 +70,7 @@ def ex_1_1_b(x_train, x_test, y_train, y_test):
 
     MSE_train, MSE_test = [], []
 
-    for i in range(0, 10):
+    for i in range(1, 11):
         nn = MLPRegressor(activation='logistic', solver='lbfgs', max_iter=5000, hidden_layer_sizes=(5,), alpha=0, random_state=69*i)
         nn.fit(x_train, y_train)
 
@@ -92,8 +92,10 @@ def ex_1_1_b(x_train, x_test, y_train, y_test):
     min_train = np.min(MSE_train)
     min_test = np.min(MSE_test)
 
-    print(mean_train, std_train, max_train, MSE_train.index(max_train), min_train, MSE_train.index(min_train))
-    print(mean_test, std_test, max_test,MSE_test.index(max_test), min_test, MSE_test.index(min_test))
+    print("train:")
+    print("mean:", mean_train,", std_dev:", std_train,", max:", max_train," at: ", MSE_train.index(max_train)*69, ", min:", min_train," at:", MSE_train.index(min_train)*69)
+    print("test:")
+    print("mean:", mean_test,", std_dev:", std_test,", max:", max_test," at: ", MSE_test.index(max_test)*69, ", min:", min_test," at:", MSE_test.index(min_test)*69)
 
     pass
 
