@@ -25,7 +25,7 @@ def ex_2_1(X_train, y_train, X_test, y_test):
     :return:
     """
 
-    randomSeed = np.random.randint(1, 100, 1)
+    randomSeed = np.random.randint(1, 100, 5)
 
     n_hidd = [1,10,100]
 
@@ -51,6 +51,7 @@ def ex_2_1(X_train, y_train, X_test, y_test):
 
             if scoretest > best_score:
                 bestNetwork = nn
+                best_score = scoretest
 
             print(100 / (len(n_hidd) * len(randomSeed)) * ((n*len(randomSeed)) + (s+1)), "%")
 
@@ -61,15 +62,28 @@ def ex_2_1(X_train, y_train, X_test, y_test):
     prediction = bestNetwork.predict(X_test)
     confusionMatrix = confusion_matrix(y_test, prediction)
 
+    #confusion matrix
     print("Confusion matrix:")
     print(classes)
     print(confusionMatrix)
 
-    print("Weights:")
-    print(bestNetwork.coefs_[0])
+    #Weight
+    plot_hidden_layer_weights(bestNetwork.coefs_[0])
 
-    print("Difference")
-    print(prediction == y_test)
+    print("Misclassified Pictures")
 
+    falseList = prediction == y_test
+
+    indexPosList = []
+
+    for i, index in enumerate(falseList):
+        if index == False:
+            indexPosList.append(i)
+
+    print(indexPosList)
+
+    for i in range(5):
+        plot_image(X_test[indexPosList[i]])
+        print("MLPClassifer think it is", prediction[indexPosList[i]], "but it is", y_test[indexPosList[i]])
     ## TODO
     pass
