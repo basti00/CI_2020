@@ -28,7 +28,45 @@ class Perceptron:
         return y_predictions
 
     def _fit(self, x_train, y_train):
-        ## TODO
+    
+        x_0 = 1
+        w_0 = 0
+
+        self.w = np.zeros((x_train.shape[1], 1))
+
+        w = np.vstack([w_0, self.w])
+        #print("X_train:", x_train)
+
+        #print(self.w.shape)
+
+        z_list = []
+
+        for i in range(self.max_iter):
+            for x, x_value in enumerate(x_train): 
+                x_new = np.append(x_0, x_value)
+                #print(x_new)
+                a = np.dot(np.transpose(w),x_new)
+            
+                z = 1 if a >= 0 else 0
+
+                if i + 1 == self.max_iter:
+                    z_list.append(z)
+
+                #print("X_VALUE:", x_value.shape, x_value)
+                #print("Y_VALUE:", y_train[x].shape)
+                #print("SELF_W:", self.w.shape)
+
+                if z != y_train[x]:
+                    print("HALLO")
+                    w += self.learning_rate * (y_train[x] - z)*np.reshape(x_new, (3,1))
+
+            #print(w)
+            if i + 1 == self.max_iter:
+                print(z_list)
+            z_list = []
+
+
+
         pass
 
     def _predict(self, x):
@@ -83,7 +121,7 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=1)
 
     learning_rate = 0.1
-    n_iter = 5
+    n_iter = 50
 
     # Perceptron from sklearn
     perceptron = SkPerceptron(alpha=learning_rate, max_iter=n_iter, fit_intercept=False)
