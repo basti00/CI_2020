@@ -83,7 +83,6 @@ def ex_2_1(X_train, y_train, X_test, y_test):
     print(indexPosList)
 
     for i in range(5):
+        print("MLPClassifer think it is", classes[prediction[indexPosList[i]]], "but it is", classes[y_test[indexPosList[i]]])
         plot_image(X_test[indexPosList[i]])
-        print("MLPClassifer think it is", prediction[indexPosList[i]], "but it is", y_test[indexPosList[i]])
-    ## TODO
     pass
