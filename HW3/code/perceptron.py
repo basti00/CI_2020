@@ -34,20 +34,36 @@ class Perceptron:
 
         self.w = np.zeros((x_train.shape[1], 1))
 
+
         w = np.vstack([w_0, self.w])
   
         z_list = []
 
         for i in range(self.max_iter):
+            changed = False
             for x, x_value in enumerate(x_train): 
                 x_new = np.append(x_0, x_value)
                 a = np.dot(np.transpose(w),x_new)
             
                 z = 1 if a >= 0 else 0
 
-                if z != y_train[x]:
-                    w += self.learning_rate * (y_train[x] - z)*np.reshape(x_new, (3,1))
+                z_list.append(z)
 
+                if z != y_train[x]:
+                    changed = True
+                    w += self.learning_rate * (y_train[x] - z)*np.reshape(x_new, (3,1))
+            if not changed:
+                break
+            if i+1 != self.max_iter:
+                z_list = []
+
+
+        # print("y:", y_train)
+        # print("z:", z_list)
+        rights = (z_list == y_train).tolist()
+        #print("rights:",rights)
+        print("Misclassification Rate:",rights.count(False)/len(y_train)*100, "%")
+        print(f"Fitted after {i+1} iteration(s).")
         self.w = w[1:]
      
 
@@ -102,21 +118,21 @@ def plot_decision_boundary(perceptron, x, y):
 
 
 def main():
-    x, y = load_data()
-    #x, y = load_non_linearly_separable_data()
+    #x, y = load_data()
+    x, y = load_non_linearly_separable_data()
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=1)
 
     learning_rate = 0.1
-    n_iter = 5
+    n_iter = 505
 
-    # Perceptron from sklearn
-    perceptron = SkPerceptron(alpha=learning_rate, max_iter=n_iter, fit_intercept=False)
-    perceptron.fit(x_train, y_train)
-    train_mse = mean_squared_error(y_train, perceptron.predict(x_train))
-    test_mse = mean_squared_error(y_test, perceptron.predict(x_test))
-    print("Training MSE:", train_mse)
-    print("Testing MSE: ", test_mse)
-    plot_decision_boundary(perceptron, x, y)
+    #Perceptron from sklearn
+    # perceptron = SkPerceptron(alpha=learning_rate, max_iter=n_iter, fit_intercept=False)
+    # perceptron.fit(x_train, y_train)
+    # train_mse = mean_squared_error(y_train, perceptron.predict(x_train))
+    # test_mse = mean_squared_error(y_test, perceptron.predict(x_test))
+    # print("Training MSE:", train_mse)
+    # print("Testing MSE: ", test_mse)
+    # plot_decision_boundary(perceptron, x, y)
 
     # Your own perceptron
     perceptron = Perceptron(learning_rate=learning_rate, max_iter=n_iter)
