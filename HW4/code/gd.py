@@ -17,7 +17,6 @@ def ex_4_a(x, y):
     # Split x, y (take 80% of x, and corresponding y). You can simply use indexing, since the dataset is already shuffled.
     len_x = len(x)
     assert len_x is len(y)
-    print("split ", int(80*len_x/100))
     X_train = x[0 : int(80*len_x/100)]
     y_train = y[0 : int(80*len_x/100)]
 
@@ -88,11 +87,6 @@ def cost(theta, x, y, C):
     :param C: penalty term
     :return: cost
     """
-    print("shape x:",np.shape(x))
-    print("shape y:",np.shape(y))
-    print("shape w:",np.shape(w))
-    print("shape b:",np.shape(b))
-    print()
 
     w, b = theta
 
@@ -101,28 +95,7 @@ def cost(theta, x, y, C):
     cost = np.power(np.linalg.norm(w),2)/2
     penalty = 0
     for (xi, yi) in zip(x,y):
-        print("shape xi:", np.shape(xi))
-        print("shape w:", np.shape(w))
-        print("shape w.T:", np.shape(w.T))
-        print("shape b:", np.shape(b))
-        print("w.T:", w.T)
-        print("xi:", xi)
-        print("b:", b)
-        a1 = np.dot(w, xi)
-        print("a1:", a1)
-        print("shape a1:", np.shape(a1))
-        c1 = a1 + b
-        print("c1:", c1)
-        print("shape c1:", np.shape(c1))
-        d1 = yi * c1
-        print("d1:", d1)
-        print("shape d1:", np.shape(d1))
-        e1 = 1 - d1
-        print("e1:", e1)
-        print("shape e1:", np.shape(e1))
-        penalty += max(0, e1)
-        print("penalty:", penalty)
-        #penalty += max(0, 1 - yi * (w.T * xi + b))
+        penalty += max(0, 1 - yi * (np.dot(w, xi) + b))
 
     return cost + (C/m) * penalty
 
