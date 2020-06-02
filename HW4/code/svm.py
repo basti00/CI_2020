@@ -30,8 +30,6 @@ def ex_1_a(x, y):
 
     plot_svm_decision_boundary(clf, x, y)
 
-    pass
-
 
 def ex_1_b(x, y):
     """
@@ -55,8 +53,6 @@ def ex_1_b(x, y):
 
     ex_1_a(x, y)
 
-    pass
-
 
 def ex_1_c(x, y):
     """
@@ -72,6 +68,19 @@ def ex_1_c(x, y):
     ## and plot the decision boundary and support vectors  for each using 'plot_svm_decision_boundary' function
     ###########
     Cs = [1e6, 1, 0.1, 0.001]
+
+    new_x = (4, 0)
+    new_y = 1
+
+    x = np.vstack([x, new_x])
+    y = np.hstack([y, new_y])
+
+    for C in Cs:
+        clf = svm.SVC(kernel='linear', C=C)
+        clf.fit(x, y)
+        plot_svm_decision_boundary(clf, x, y)
+
+
 
 
 def ex_2_a(x_train, y_train, x_test, y_test):
