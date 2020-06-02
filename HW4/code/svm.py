@@ -93,10 +93,15 @@ def ex_2_a(x_train, y_train, x_test, y_test):
     :return:
     """
     ###########
-    ## TODO:
     ## Train an SVM with a linear kernel for the given dataset
     ## and plot the decision boundary and support vectors  for each using 'plot_svm_decision_boundary' function
     ###########
+
+    clf = svm.SVC(kernel='linear')
+    clf.fit(x_train, y_train)
+    plot_svm_decision_boundary(clf, x_train, y_train, x_test, y_test)
+    print("ex_2_a score:", clf.score(x_test, y_test))
+
     pass
 
 
@@ -118,6 +123,28 @@ def ex_2_b(x_train, y_train, x_test, y_test):
     ## using 'plot_svm_decision_boundary' function
     ###########
     degrees = range(1, 21)
+
+    test_scores = np.array([])
+    train_scores = np.array([])
+    best_svm = None
+    best_test_score = 0
+
+    for deg in degrees:
+        clf = svm.SVC(kernel='poly', degree=deg, coef0=1)
+        clf.fit(x_train, y_train)
+
+        test_score = clf.score(x_test, y_test)
+
+        if test_score > best_test_score:
+            best_test_score = test_score
+            best_svm = clf
+
+        test_scores  = np.append(test_scores, test_score)
+        train_scores = np.append(train_scores, clf.score(x_train, y_train))
+
+    plot_score_vs_degree(train_scores, test_scores, degrees)
+
+    plot_svm_decision_boundary(clf, x_train, y_train, x_test, y_test)
 
 
 def ex_2_c(x_train, y_train, x_test, y_test):
