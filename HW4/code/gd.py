@@ -8,15 +8,26 @@ TODOs. Fill the cost function, the gradient function and gradient descent solver
 """
 
 def ex_4_a(x, y):
+    C = 1
+    eta = 1
+    max_iter = 10
 
-    # TODO: Split x, y (take 80% of x, and corresponding y). You can simply use indexing, since the dataset is already shuffled.
-    
+    #print("shape x:",np.shape(x))
+    #print("shape y:",np.shape(y))
+    # Split x, y (take 80% of x, and corresponding y). You can simply use indexing, since the dataset is already shuffled.
+    len_x = len(x)
+    assert len_x is len(y)
+    print("split ", int(80*len_x/100))
+    X_train = x[0 : int(80*len_x/100)]
+    y_train = y[0 : int(80*len_x/100)]
+
     # Define the functions of the parameter we want to optimize
     f = lambda th: cost(th, X_train, y_train, C)
     df = lambda th: grad(th, X_train, y_train, C)
     
-    # TODO: Initialize w and b to zeros. What is the dimensionality of w?
-    w, b = 0, 0
+    # Initialize w and b to zeros. What is the dimensionality of w?
+    w = np.zeros(2)
+    b = 0
 
     theta_opt, E_list = gradient_descent(f, df, (w, b), eta, max_iter)
     w, b = theta_opt
@@ -49,18 +60,22 @@ def gradient_descent(f, df, theta0, learning_rate, max_iter):
     :return: x (solution), E_list (array of errors over iterations)
     """
     ##############
-    #
-    # TODO
-    #
     # Implement a gradient descent algorithm
 
     E_list = np.zeros(max_iter)
-    w, b = theta0
+    w,b = theta0
 
-    # END TODO
-    ###########
+    for i in range(max_iter):
+        theta = (w,b)
+        E_list[i] = f(theta)
+        gw, gb = df(theta)
+        w = w - gw * learning_rate
+        b = b - gb * learning_rate
 
-    return (w, b), E_list
+        if i%5 == 0:
+          print(100*i/max_iter, "%")
+    theta = (w, b)
+    return theta, E_list
 
 
 def cost(theta, x, y, C):
@@ -73,17 +88,41 @@ def cost(theta, x, y, C):
     :param C: penalty term
     :return: cost
     """
-    #print("shape x:",np.shape(x))
-    #print("shape y:",np.shape(y))
+    print("shape x:",np.shape(x))
+    print("shape y:",np.shape(y))
+    print("shape w:",np.shape(w))
+    print("shape b:",np.shape(b))
+    print()
 
     w, b = theta
 
     m = len(x)
     assert m is len(y)
-    cost = np.power(np.norm(w),2)/2
+    cost = np.power(np.linalg.norm(w),2)/2
     penalty = 0
     for (xi, yi) in zip(x,y):
-        penalty += max(0, 1 - yi * (w.T * xi + b))
+        print("shape xi:", np.shape(xi))
+        print("shape w:", np.shape(w))
+        print("shape w.T:", np.shape(w.T))
+        print("shape b:", np.shape(b))
+        print("w.T:", w.T)
+        print("xi:", xi)
+        print("b:", b)
+        a1 = np.dot(w, xi)
+        print("a1:", a1)
+        print("shape a1:", np.shape(a1))
+        c1 = a1 + b
+        print("c1:", c1)
+        print("shape c1:", np.shape(c1))
+        d1 = yi * c1
+        print("d1:", d1)
+        print("shape d1:", np.shape(d1))
+        e1 = 1 - d1
+        print("e1:", e1)
+        print("shape e1:", np.shape(e1))
+        penalty += max(0, e1)
+        print("penalty:", penalty)
+        #penalty += max(0, 1 - yi * (w.T * xi + b))
 
     return cost + (C/m) * penalty
 
@@ -102,7 +141,7 @@ def grad(theta, x, y, C):
     w, b = theta
 
     def Ii(yi,w,xi,b):
-        if 1 - yi * (w.T * xi + b) <= 0:
+        if 1 - yi * (np.dot(w,xi) + b) <= 0:
             return 0
         return 1
 
@@ -118,4 +157,4 @@ def grad(theta, x, y, C):
     grad_w = w - (C/m) * term_w
     grad_b = -(C/m) * term_b
     
-    return grad_w, grad_b
+    return (grad_w, grad_b)
