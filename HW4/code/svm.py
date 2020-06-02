@@ -24,6 +24,12 @@ def ex_1_a(x, y):
     ## Train an SVM with a linear kernel
     ## and plot the decision boundary and support vectors using 'plot_svm_decision_boundary' function
     ###########
+
+    clf = svm.SVC(kernel='linear')
+    clf.fit(x, y)
+
+    plot_svm_decision_boundary(clf, x, y)
+
     pass
 
 
@@ -40,6 +46,15 @@ def ex_1_b(x, y):
     ## train an SVM with a linear kernel
     ## and plot the decision boundary and support vectors using 'plot_svm_decision_boundary' function
     ###########
+
+    new_x = (4, 0)
+    new_y = 1
+
+    x = np.vstack([x, new_x])
+    y = np.hstack([y, new_y])
+
+    ex_1_a(x, y)
+
     pass
 
 
