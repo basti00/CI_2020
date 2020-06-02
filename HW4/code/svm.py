@@ -258,17 +258,24 @@ def ex_3_b(x_train, y_train, x_test, y_test):
 
     cm = confusion_matrix(y_test, y_test_predict)
     plot_confusion_matrix(cm, labels)
-
     #print(cm)
 
     diff_list = y_test_predict == y_test
+
     # indexes of all missclassiefied images
     misclassifieds = [i for i, val in enumerate(diff_list) if val == False]
-    # print(diff_list)
-    # print(misclassifieds)
+
+    # remove diagonal elements from cm for later processing
+    cm_no_diagonal = cm
+    np.fill_diagonal(cm_no_diagonal, 0)
+    #print(cm_no_diagonal)
+
+    errors_per_class = np.sum(cm_no_diagonal, axis=0)
+    #print(errors_per_class)
 
     sel_err = np.array(misclassifieds)  # CHANGE ME! Numpy indices to select all images that are misclassified.
-    i = 0  # CHANGE ME! Should be the label number corresponding the largest classification error.
+    i = np.argmax(errors_per_class)  # CHANGE ME! Should be the label number corresponding the largest classification error.
+    #print(i)
 
     # Plot with mnist plot
     plot_mnist(x_test[sel_err], y_test_predict[sel_err], labels=labels[i], k_plots=10, prefix='Predicted class')
