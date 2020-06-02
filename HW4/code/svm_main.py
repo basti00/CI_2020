@@ -33,7 +33,6 @@ def ex_1():
     x, y = data['X'], data['Y'].ravel()
 
     plot_data_points(x, y)
-
     ex_1_a(x, y)
     ex_1_b(x, y)
     ex_1_c(x, y)
@@ -75,9 +74,9 @@ def ex_4():
 
 
 def main():
-    #ex_1()
-    #ex_2()
-    #ex_3()
+    ex_1()
+    ex_2()
+    ex_3()
     ex_4()
 
 

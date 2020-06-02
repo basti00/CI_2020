@@ -218,7 +218,7 @@ def ex_3_a(x_train, y_train, x_test, y_test):
     gam_score_train = []
     gam_score_test = []
     for gamma_value in gamma_range:
-        gam = svm.SVC(decision_function_shape='ovr', kernel='rbf', gamma=gamma_value)
+        gam = svm.SVC(decision_function_shape='ovr', kernel='rbf', gamma=gamma_value, C=10)
         gam.fit(x_train, y_train)
 
         gam_score_train.append(gam.score(x_train, y_train))
@@ -248,8 +248,34 @@ def ex_3_b(x_train, y_train, x_test, y_test):
 
     labels = range(1, 6)
 
-    sel_err = np.array([0])  # CHANGE ME! Numpy indices to select all images that are misclassified.
-    i = 0  # CHANGE ME! Should be the label number corresponding the largest classification error.
+    lin = svm.SVC(decision_function_shape='ovr', kernel='linear')
+    lin.fit(x_train, y_train)
+
+    y_test_predict =lin.predict(x_test)
+
+    score_train = lin.score(x_train, y_train)
+    score_test = lin.score(x_test, y_test)
+
+    cm = confusion_matrix(y_test, y_test_predict)
+    plot_confusion_matrix(cm, labels)
+    #print(cm)
+
+    diff_list = y_test_predict == y_test
+
+    # indexes of all missclassiefied images
+    misclassifieds = [i for i, val in enumerate(diff_list) if val == False]
+
+    # remove diagonal elements from cm for later processing
+    cm_no_diagonal = cm
+    np.fill_diagonal(cm_no_diagonal, 0)
+    #print(cm_no_diagonal)
+
+    errors_per_class = np.sum(cm_no_diagonal, axis=0)
+    #print(errors_per_class)
+
+    sel_err = np.array(misclassifieds)  # CHANGE ME! Numpy indices to select all images that are misclassified.
+    i = np.argmax(errors_per_class)  # CHANGE ME! Should be the label number corresponding the largest classification error.
+    #print(i)
 
     # Plot with mnist plot
-    plot_mnist(x_test[sel_err], y_pred[sel_err], labels=labels[i], k_plots=10, prefix='Predicted class')
+    plot_mnist(x_test[sel_err], y_test_predict[sel_err], labels=labels[i], k_plots=10, prefix='Predicted class')
