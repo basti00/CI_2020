@@ -8,16 +8,16 @@ TODOs. Fill the cost function, the gradient function and gradient descent solver
 """
 
 def ex_4_a(x, y):
-    
+
     # TODO: Split x, y (take 80% of x, and corresponding y). You can simply use indexing, since the dataset is already shuffled.
-    
     
     # Define the functions of the parameter we want to optimize
     f = lambda th: cost(th, X_train, y_train, C)
     df = lambda th: grad(th, X_train, y_train, C)
     
     # TODO: Initialize w and b to zeros. What is the dimensionality of w?
-    
+    w, b = 0, 0
+
     theta_opt, E_list = gradient_descent(f, df, (w, b), eta, max_iter)
     w, b = theta_opt
     
@@ -73,9 +73,19 @@ def cost(theta, x, y, C):
     :param C: penalty term
     :return: cost
     """
-    cost = 0 # TODO 
+    #print("shape x:",np.shape(x))
+    #print("shape y:",np.shape(y))
 
-    return cost
+    w, b = theta
+
+    m = len(x)
+    assert m is len(y)
+    cost = np.power(np.norm(w),2)/2
+    penalty = 0
+    for (xi, yi) in zip(x,y):
+        penalty += max(0, 1 - yi * (w.T * xi + b))
+
+    return cost + (C/m) * penalty
 
 
 def grad(theta, x, y, C):
@@ -90,8 +100,22 @@ def grad(theta, x, y, C):
     :return: grad_w, grad_b
     """
     w, b = theta
-    
-    grad_w = 0  # TODO 
-    grad_b = 0  # TODO 
+
+    def Ii(yi,w,xi,b):
+        if 1 - yi * (w.T * xi + b) <= 0:
+            return 0
+        return 1
+
+    m = len(x)
+    assert m is len(y)
+
+    term_b = 0
+    term_w = 0
+    for (xi, yi) in zip(x,y):
+        Ii_val = Ii(yi,w,xi,b)
+        term_w += Ii_val * yi * xi
+        term_b += Ii_val * yi
+    grad_w = w - (C/m) * term_w
+    grad_b = -(C/m) * term_b
     
     return grad_w, grad_b
