@@ -165,6 +165,28 @@ def ex_2_c(x_train, y_train, x_test, y_test):
     ###########
     gammas = np.arange(0.01, 2, 0.02)
 
+    test_scores = np.array([])
+    train_scores = np.array([])
+    best_svm = None
+    best_test_score = 0
+
+    for gamma in gammas:
+        clf = svm.SVC(kernel='rbf', gamma=gamma)
+        clf.fit(x_train, y_train)
+
+        test_score = clf.score(x_test, y_test)
+
+        if test_score > best_test_score:
+            best_test_score = test_score
+            best_svm = clf
+
+        test_scores  = np.append(test_scores, test_score)
+        train_scores = np.append(train_scores, clf.score(x_train, y_train))
+
+    plot_score_vs_gamma(train_scores, test_scores, gammas)
+
+    plot_svm_decision_boundary(clf, x_train, y_train, x_test, y_test)
+
 
 def ex_3_a(x_train, y_train, x_test, y_test):
     """
