@@ -206,8 +206,6 @@ def ex_3_a(x_train, y_train, x_test, y_test):
     plot_score_vs_gamma(gam_score_train, gam_score_test, gamma_range, score_train, score_test, baseline=0.2)
 
 
-
-
 def ex_3_b(x_train, y_train, x_test, y_test):
     """
     Solution for exercise 3 b)
