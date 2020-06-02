@@ -93,10 +93,15 @@ def ex_2_a(x_train, y_train, x_test, y_test):
     :return:
     """
     ###########
-    ## TODO:
     ## Train an SVM with a linear kernel for the given dataset
     ## and plot the decision boundary and support vectors  for each using 'plot_svm_decision_boundary' function
     ###########
+
+    clf = svm.SVC(kernel='linear')
+    clf.fit(x_train, y_train)
+    plot_svm_decision_boundary(clf, x_train, y_train, x_test, y_test)
+    print("ex_2_a score:", clf.score(x_test, y_test))
+
     pass
 
 
