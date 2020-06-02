@@ -157,6 +157,29 @@ def ex_3_a(x_train, y_train, x_test, y_test):
     ## - Note that the chance level is not .5 anymore and add the score obtained with the linear kernel as optional argument of this function (parameter baseline)
     ###########
 
+    gamma_range = [10**-5, 10**-4, 10**-3, 10**-2, 10**-1, 10**0, 10**1, 10**2, 10**3, 10**4, 10**5]
+
+    lin = svm.SVC(decision_function_shape='ovr', kernel='linear')
+    lin.fit(x_train, y_train)
+
+
+    score_train = lin.score(x_train, y_train)
+    score_test = lin.score(x_test, y_test)
+
+    gam_score_train = []
+    gam_score_test = []
+    for gamma_value in gamma_range:
+        gam = svm.SVC(decision_function_shape='ovr', kernel='rbf', gamma=gamma_value)
+        gam.fit(x_train, y_train)
+
+        gam_score_train.append(gam.score(x_train, y_train))
+        gam_score_test.append(gam.score(x_test, y_test))
+
+
+    plot_score_vs_gamma(gam_score_train, gam_score_test, gamma_range, score_train, score_test, baseline=0.2)
+
+
+
 
 def ex_3_b(x_train, y_train, x_test, y_test):
     """
