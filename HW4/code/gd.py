@@ -75,12 +75,15 @@ def cost(theta, x, y, C):
     """
     #print("shape x:",np.shape(x))
     #print("shape y:",np.shape(y))
+
+    w, b = theta
+
     m = len(x)
     assert m is len(y)
-    cost = np.power(np.norm(theta),2)/2
+    cost = np.power(np.norm(w),2)/2
     penalty = 0
     for (xi, yi) in zip(x,y):
-        penalty += max(0, 1 - yi * (theta.T * xi + b))
+        penalty += max(0, 1 - yi * (w.T * xi + b))
 
     return cost + (C/m) * penalty
 
@@ -109,10 +112,10 @@ def grad(theta, x, y, C):
     term_b = 0
     term_w = 0
     for (xi, yi) in zip(x,y):
-        Ii_val = Ii(yi,theta,xi,b)
+        Ii_val = Ii(yi,w,xi,b)
         term_w += Ii_val * yi * xi
         term_b += Ii_val * yi
-    grad_w = theta - (C/m) * term_w
+    grad_w = w - (C/m) * term_w
     grad_b = -(C/m) * term_b
     
     return grad_w, grad_b
