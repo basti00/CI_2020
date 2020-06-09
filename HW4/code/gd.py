@@ -9,8 +9,8 @@ TODOs. Fill the cost function, the gradient function and gradient descent solver
 
 def ex_4_a(x, y):
     C = 1.0
-    eta = 1.0
-    max_iter = 10
+    eta = 0.1
+    max_iter = 25
 
     # Split x, y (take 80% of x, and corresponding y). You can simply use indexing, since the dataset is already shuffled.
     len_x = len(x)
@@ -30,14 +30,25 @@ def ex_4_a(x, y):
 
     theta_opt, E_list = gradient_descent(f, df, (w, b), eta, max_iter)
     w, b = theta_opt
-    print("optimal paramter w, b = ", w, ",", b)
     def predict(xi):
         if np.dot(w,xi)+b >= 0:
             return 1
         return -1
 
-    # TODO: Calculate the predictions using the test set
-    # TODO: Calculate the accuracy
+    right = 0
+    wrong = 0
+    for (x_t, y_t) in zip(x_test,y_test):
+        y_predict = predict(x_t)
+        if y_predict == y_t:
+            right += 1
+        else:
+            wrong += 1
+    accuracy = right / (wrong + right)
+
+    print("\nex_4: ")
+    print("optimal paramter w, b = ", w, ",", b)
+    print("right:", right, ", wrong:", wrong, ", accuracy:", accuracy)
+    print("final cost value: ", f(theta_opt))
     
     # Plot the list of errors
     if len(E_list) > 0:
@@ -46,8 +57,8 @@ def ex_4_a(x, y):
         ax.set_xlabel('Iteration number')
         ax.set_ylabel('Error')
         ax.set_title('Error monitoring')
-        
-    # TODO: Call the function for plotting (plot_decision_function).
+
+    plot_decision_function(theta_opt, x_train, x_test, y_train, y_test)
 
 
 def gradient_descent(f, df, theta0, learning_rate, max_iter):
