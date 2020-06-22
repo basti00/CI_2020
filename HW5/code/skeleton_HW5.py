@@ -24,7 +24,7 @@ def main():
     #x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
 
     ## (c) visually inspect the data with the provided function (see example below)
-    #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
@@ -41,20 +41,9 @@ def main():
     #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
     #... = EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
     initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
-    k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
+    k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
     #TODO visualize your results
-
-
-    plt.scatter(data[labels==0,0], data[labels==0,1], label='Iris-Setosa')
-    plt.scatter(data[labels==1,0], data[labels==1,1], label='Iris-Versicolor')
-    plt.scatter(data[labels==2,0], data[labels==2,1], label='Iris-Virgnica')
-    plt.scatter(initial_centers[0], initial_centers[1], label='Centers')
-    plt.xlabel(feature_names[0])
-    plt.ylabel(feature_names[2])
-    plt.title("test")
-    plt.legend()
-    plt.show()
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
@@ -147,13 +136,13 @@ def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
         X... (optional) samples that may be used for proper inititalization, nr_samples x dimension(D)
     Returns:
         initial_centers... initial cluster centers,  D x nr_clusters"""
-    #TODO: chosse suitable inital values for each scenario
+    #TODO: choose suitable inital values for each scenario
 
     if (scenario == 1):
-        return np.random.randint(np.min(X), np.max(X), (dimension, nr_clusters))
+        return X[np.random.choice(X.shape[0], nr_clusters, replace=False)].T
 
 #--------------------------------------------------------------------------------
-def k_means(X,K, centers_0, max_iter, tol):
+def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
     """ perform the KMeans-algorithm in order to cluster the data into K clusters
     Input:
         X... samples, nr_samples x dimension (D)
@@ -168,7 +157,7 @@ def k_means(X,K, centers_0, max_iter, tol):
     #TODO: iteratively update the cluster centers
 
     #indices of closest centers for each point
-    nearest_centers = np.zeros((X.shape[0]))
+    nearest_centers = np.zeros((X.shape[0]), dtype=np.int)
     centers = centers_0.T
 
     for i in range(max_iter):
@@ -180,8 +169,28 @@ def k_means(X,K, centers_0, max_iter, tol):
                 if dist < min_dist:
                     min_dist = dist
                     nearest_centers[x_index] = center_index
-            
-    print(nearest_centers)
+
+        # set new centers
+        old_centers = centers
+        centers = np.zeros((K, X.shape[1]))
+        for x_index, center_index in enumerate(nearest_centers):
+            centers[center_index] += 1/len([x for x in nearest_centers if x == center_index]) * X[x_index]
+
+        if np.array_equal(old_centers,centers):
+            print("Done")
+            return
+        
+        plt.scatter(X[nearest_centers==0,0], X[nearest_centers==0,1], label='Iris-Setosa')
+        plt.scatter(X[nearest_centers==1,0], X[nearest_centers==1,1], label='Iris-Versicolor')
+        plt.scatter(X[nearest_centers==2,0], X[nearest_centers==2,1], label='Iris-Virgnica')
+        plt.scatter(centers.T[0], centers.T[1], label='Centers')
+        plt.xlabel(feature_names[0])
+        plt.ylabel(feature_names[2])
+        plt.title("test")
+        plt.legend()
+        plt.show()
+
+        print(nearest_centers)
 
 
     #TODO: classify all samples after convergence
