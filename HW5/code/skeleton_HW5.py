@@ -21,10 +21,10 @@ def main():
     x_4dim = data
 
     #TODO: implement PCA
-    x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
+    #x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
 
     ## (c) visually inspect the data with the provided function (see example below)
-    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
@@ -33,18 +33,28 @@ def main():
     nr_components = 3
 
     #TODO set parameters
-    #tol = ...  # tolerance
-    #max_iter = ...  # maximum iterations for GN
+    tol = 0.01  # tolerance
+    max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
     #TODO: implement
     #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
     #... = EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    #... = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
+    initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
+    k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
 
     #TODO visualize your results
 
+
+    plt.scatter(data[labels==0,0], data[labels==0,1], label='Iris-Setosa')
+    plt.scatter(data[labels==1,0], data[labels==1,1], label='Iris-Versicolor')
+    plt.scatter(data[labels==2,0], data[labels==2,1], label='Iris-Virgnica')
+    plt.scatter(initial_centers[0], initial_centers[1], label='Centers')
+    plt.xlabel(feature_names[0])
+    plt.ylabel(feature_names[2])
+    plt.title("test")
+    plt.legend()
+    plt.show()
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
@@ -138,7 +148,10 @@ def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
     Returns:
         initial_centers... initial cluster centers,  D x nr_clusters"""
     #TODO: chosse suitable inital values for each scenario
-    pass
+
+    if (scenario == 1):
+        return np.random.randint(np.min(X), np.max(X), (dimension, nr_clusters))
+
 #--------------------------------------------------------------------------------
 def k_means(X,K, centers_0, max_iter, tol):
     """ perform the KMeans-algorithm in order to cluster the data into K clusters
@@ -154,8 +167,25 @@ def k_means(X,K, centers_0, max_iter, tol):
     assert D == centers_0.shape[0]
     #TODO: iteratively update the cluster centers
 
+    #indices of closest centers for each point
+    nearest_centers = np.zeros((X.shape[0]))
+    centers = centers_0.T
+
+    for i in range(max_iter):
+        for x_index, x in enumerate(X):
+            # find closest center
+            min_dist = np.inf
+            for center_index, center in enumerate(centers):
+                dist = np.linalg.norm(x-center)
+                if dist < min_dist:
+                    min_dist = dist
+                    nearest_centers[x_index] = center_index
+            
+    print(nearest_centers)
+
+
     #TODO: classify all samples after convergence
-    pass
+    return
 #--------------------------------------------------------------------------------
 def PCA(data,nr_dimensions=None, whitening=False):
     """ perform PCA and reduce the dimension of the data (D) to nr_dimensions
@@ -337,5 +367,5 @@ def sanity_checks():
 #--------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    sanity_checks()
+    #sanity_checks()
     main()
