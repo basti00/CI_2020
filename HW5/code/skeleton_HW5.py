@@ -101,27 +101,32 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         alpha_0... initial weight of each component, 1 x nr_components
         mean_0 ... initial mean values, D x nr_components
         cov_0 ...  initial covariance for each component, D x D x nr_components"""
-    
-    # TODO choose suitable initial values for each scenario
-    
+
     alpha_0 = np.ones((1, nr_components))/nr_components
     mean_0 = np.ones((dimension, nr_components))
     cov_0 = np.ones((dimension, dimension, nr_components))
-
+    print("dimension: ", dimension)
+    print("nr_components: ", nr_components)
+    print("np.shape(X): ", np.shape(X))
     if X is not None:
         mean = np.mean(X)
-        #print(X)
-        #print(np.shape(X)) # (150, 2)
         sum = 0
         for i, x_n in enumerate(X):
             diff = x_n-mean
+            print("mat mult var 1: ",np.matmul(diff, diff.T))
+            print("mat mult var 2: ",np.matmul(diff.T, diff))
             sum += np.matmul(diff.T, diff)
-        mean_0 *= (sum/nr_components)
-        #for x_n in X:
-        #    cov_0 = np.ones((dimension, dimension, nr_components))
-    print(alpha_0)
-    print(mean_0)
-    print(cov_0)
+        cov_0 *= (sum/nr_components)
+        mean_t = mean_0.T
+        for i in range(nr_components):
+            dsd = X[np.random.randint(0,nr_components)]
+            #print(dsd)
+            mean_t[i] = dsd
+        mean_0 = mean_t.T
+
+    print(alpha_0.shape)
+    print(mean_0.shape)
+    print(cov_0.shape)
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
@@ -144,7 +149,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     D = X.shape[1]
     assert D == mean_0.shape[0]
     #TODO: iteratively compute the posterior and update the parameters
-    
+
     r = np.zeros((K, X.shape[0]))
 
     log_likelihood = []
@@ -153,7 +158,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
 
     for i in range(max_iter):
 
-        #calc r 
+        #calc r
         for n in range(N):
             for k in range(K):
                 r_nenner = 0
@@ -165,7 +170,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
                 r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
 
         #calc new alpha, mean and cov
-        
+
 
         for k in range(K):
             #calc mean_0 new
@@ -190,7 +195,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
             #calc alpha_0 new
             alpha_0[k] = N_k / N
 
-        #calc log_likelihood per iteration 
+        #calc log_likelihood per iteration
         log_likelihood_it = 0
 
         for n in range(N):
