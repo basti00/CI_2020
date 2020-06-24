@@ -149,10 +149,12 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
 
     log_likelihood = []
 
+    N = X.shape[0]
+
     for i in range(max_iter):
 
         #calc r 
-        for n in range(X.shape[0]):
+        for n in range(N):
             for k in range(K):
                 r_nenner = 0
                 for k_ in range(K):
@@ -163,14 +165,14 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
                 r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
 
         #calc new alpha, mean and cov
-        N = X.shape[0]
+        
 
         for k in range(K):
             #calc mean_0 new
             mean_temp = 0
             N_k = 0
 
-            for n in range(X.shape[0]):
+            for n in range(N):
                 mean_temp += r[k][n]*X[n]
 
                 #calc N_k and N for later use
@@ -180,9 +182,8 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
 
             #calc cov_0 new
             cov_temp = 0
-            for n in range(X.shape[0]):
-                trans = X[n] * mean_0[k]
-                cov_temp += r[k][n] * (X[n] - mean_0[k]) * trans.T
+            for n in range(N):
+                cov_temp += r[k][n] * (X[n] - mean_0[k]) * (X[n] - mean_0[k]).T
 
             cov_0[k] = cov_temp / N_k
 
@@ -192,13 +193,13 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
         #calc log_likelihood per iteration 
         log_likelihood_it = 0
 
-        for n in range(X.shape[0]):
+        for n in range(N):
             for k in range(K):
-                log_likelihood_it += likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
+                log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
         
         log_likelihood.append(log_likelihood_it)
 
-        if log_likelihood_it[-1] == log_likelihood[-2]:
+        if log_likelihood[-1] == log_likelihood[-2]:
             return alpha_0, mean_0, cov_0, log_likelihood, r
 
     return alpha_0, mean_0, cov_0, log_likelihood, r
