@@ -110,14 +110,13 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     print("np.shape(X): ", np.shape(X))
     if X is not None:
         mean = np.mean(X)
-        sum = 0
+        summand = 0
         for i, x_n in enumerate(X):
             diff = x_n-mean
             diff = diff.reshape((2,1))
-            #print("mat mult var 1: ",np.matmul(diff, diff.T))
-            #print("mat mult var 2: ",np.matmul(diff.T, diff))
-            sum += np.matmul(diff, diff.T)
-        cov_0 *= (sum/nr_components)
+            summand += np.matmul(diff, diff.T)
+        for i in range(cov_0.shape[-1]):
+            cov_0[...,i] = (summand/nr_components)
         mean_t = mean_0.T
         for i in range(nr_components):
             dsd = X[np.random.randint(0,nr_components)]
