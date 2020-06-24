@@ -117,6 +117,7 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
             #print("mat mult var 1: ",np.matmul(diff, diff.T))
             #print("mat mult var 2: ",np.matmul(diff.T, diff))
             sum += np.matmul(diff, diff.T)
+            print(sum.shape)
         cov_0 *= (sum/nr_components)
         mean_t = mean_0.T
         for i in range(nr_components):
