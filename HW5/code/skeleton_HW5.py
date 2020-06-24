@@ -38,7 +38,7 @@ def main():
     #nr_components = ... #n number of components
 
     #TODO: implement
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
     EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
     #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
     #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
@@ -104,9 +104,21 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     
     # TODO choose suitable initial values for each scenario
     
-    alpha_0 = np.ones((1, nr_components))
+    alpha_0 = np.ones((1, nr_components))/nr_components
     mean_0 = np.ones((dimension, nr_components))
     cov_0 = np.ones((dimension, dimension, nr_components))
+
+    if X is not None:
+        mean = np.mean(X)
+        #print(X)
+        #print(np.shape(X)) # (150, 2)
+        sum = 0
+        for i, x_n in enumerate(X):
+            diff = x_n-mean
+            sum += np.matmul(diff.T, diff)
+        mean_0 *= (sum/nr_components)
+        #for x_n in X:
+        #    cov_0 = np.ones((dimension, dimension, nr_components))
     print(alpha_0.shape)
     print(mean_0.shape)
     print(cov_0.shape)
