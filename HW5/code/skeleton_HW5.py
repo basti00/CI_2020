@@ -113,9 +113,10 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         sum = 0
         for i, x_n in enumerate(X):
             diff = x_n-mean
-            print("mat mult var 1: ",np.matmul(diff, diff.T))
-            print("mat mult var 2: ",np.matmul(diff.T, diff))
-            sum += np.matmul(diff.T, diff)
+            diff = diff.reshape((2,1))
+            #print("mat mult var 1: ",np.matmul(diff, diff.T))
+            #print("mat mult var 2: ",np.matmul(diff.T, diff))
+            sum += np.matmul(diff, diff.T)
         cov_0 *= (sum/nr_components)
         mean_t = mean_0.T
         for i in range(nr_components):
