@@ -21,7 +21,7 @@ def main():
     x_4dim = data
 
     #TODO: implement PCA
-    x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
+    #x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
 
     ## (c) visually inspect the data with the provided function (see example below)
     plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
@@ -34,17 +34,16 @@ def main():
 
     #TODO set parameters
     tol = 0.01  # tolerance
-    max_iter = 200  # maximum iterations for GN
+    max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
     #TODO: implement
     (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
     EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    #... = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
+    #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
+    #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
     #TODO visualize your results
-
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
@@ -107,10 +106,10 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     
     alpha_0 = np.ones((1, nr_components))
     mean_0 = np.ones((dimension, nr_components))
-    cov_0 = np.ones((nr_components, dimension, dimension))
-    print(alpha_0)
-    print(mean_0)
-    print(cov_0)
+    cov_0 = np.ones((dimension, dimension, nr_components))
+    print(alpha_0.shape)
+    print(mean_0.shape)
+    print(cov_0.shape)
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
@@ -137,13 +136,14 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     i = 0
 
     r = np.zeros((len(X), K))
-    for n in range(len(X)):
-        for k in range(K):
-            r_nenne = 0
-            for k_ in range(K):
-                r_nenne += alpha_0[i][k_] * likelihood_multivariate_normal(X[n], mean_0[i], cov_0[i])
+    for i in range(max_iter):
+        for n in range(len(X)):
+            for k in range(K):
+                r_nenner = 0
+                for k_ in range(K):
+                    r_nenner += alpha_0[i][k_] * likelihood_multivariate_normal(X[n], mean_0.T[i], cov_0.T[i])
 
-            r[n][k] = alpha_0[k][i] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k])
+                r[n][k] = alpha_0[i][k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
     #TODO: classify all samples after convergence
     pass
 #--------------------------------------------------------------------------------
@@ -156,10 +156,13 @@ def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
         X... (optional) samples that may be used for proper inititalization, nr_samples x dimension(D)
     Returns:
         initial_centers... initial cluster centers,  D x nr_clusters"""
-    #TODO: chosse suitable inital values for each scenario
-    pass
+    #TODO: choose suitable inital values for each scenario
+
+    if (scenario == 1):
+        return X[np.random.choice(X.shape[0], nr_clusters, replace=False)].T
+
 #--------------------------------------------------------------------------------
-def k_means(X,K, centers_0, max_iter, tol):
+def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
     """ perform the KMeans-algorithm in order to cluster the data into K clusters
     Input:
         X... samples, nr_samples x dimension (D)
@@ -173,8 +176,45 @@ def k_means(X,K, centers_0, max_iter, tol):
     assert D == centers_0.shape[0]
     #TODO: iteratively update the cluster centers
 
+    #indices of closest centers for each point
+    nearest_centers = np.zeros((X.shape[0]), dtype=np.int)
+    centers = centers_0.T
+
+    for i in range(max_iter):
+        for x_index, x in enumerate(X):
+            # find closest center
+            min_dist = np.inf
+            for center_index, center in enumerate(centers):
+                dist = np.linalg.norm(x-center)
+                if dist < min_dist:
+                    min_dist = dist
+                    nearest_centers[x_index] = center_index
+
+        # set new centers
+        old_centers = centers
+        centers = np.zeros((K, X.shape[1]))
+        for x_index, center_index in enumerate(nearest_centers):
+            centers[center_index] += 1/len([x for x in nearest_centers if x == center_index]) * X[x_index]
+
+        if np.array_equal(old_centers,centers):
+            print("Done")
+            return
+        
+        plt.scatter(X[nearest_centers==0,0], X[nearest_centers==0,1], label='Iris-Setosa')
+        plt.scatter(X[nearest_centers==1,0], X[nearest_centers==1,1], label='Iris-Versicolor')
+        plt.scatter(X[nearest_centers==2,0], X[nearest_centers==2,1], label='Iris-Virgnica')
+        plt.scatter(centers.T[0], centers.T[1], label='Centers')
+        plt.xlabel(feature_names[0])
+        plt.ylabel(feature_names[2])
+        plt.title("test")
+        plt.legend()
+        plt.show()
+
+        print(nearest_centers)
+
+
     #TODO: classify all samples after convergence
-    pass
+    return
 #--------------------------------------------------------------------------------
 def PCA(data,nr_dimensions=None, whitening=False):
     """ perform PCA and reduce the dimension of the data (D) to nr_dimensions
@@ -358,5 +398,5 @@ def sanity_checks():
 #--------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    sanity_checks()
+    #sanity_checks()
     main()
