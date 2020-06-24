@@ -163,17 +163,13 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
                 r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
 
         #calc new alpha, mean and cov
-        N = 0
-        N_k = 0
-
-        for k in range(K):
-            for n in range(X.shape[0]):
-                N += r[k][n]
+        N = X.shape[0]
 
         for k in range(K):
             #calc mean_0 new
             mean_temp = 0
-            
+            N_k = 0
+
             for n in range(X.shape[0]):
                 mean_temp += r[k][n]*X[n]
 
