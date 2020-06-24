@@ -145,14 +145,14 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     assert D == mean_0.shape[0]
     #TODO: iteratively compute the posterior and update the parameters
     
-    r = np.zeros((K, len(X)))
+    r = np.zeros((K, X.shape[0]))
 
     log_likelihood = []
 
     for i in range(max_iter):
 
         #calc r 
-        for n in range(len(X)):
+        for n in range(X.shape[0]):
             for k in range(K):
                 r_nenner = 0
                 for k_ in range(K):
@@ -165,34 +165,38 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
         #calc new alpha, mean and cov
         N = 0
         N_k = 0
+
+        for k in range(K):
+            for n in range(X.shape[0]):
+                N += r[k][n]
+
         for k in range(K):
             #calc mean_0 new
             mean_temp = 0
             
-            for n in range(len(X)):
+            for n in range(X.shape[0]):
                 mean_temp += r[k][n]*X[n]
 
                 #calc N_k and N for later use
                 N_k += r[k][n]
-                N += r[k][n]
 
             mean_0[k] = mean_temp / N_k
 
             #calc cov_0 new
             cov_temp = 0
-            for n in range(len(X)):
+            for n in range(X.shape[0]):
                 trans = X[n] * mean_0[k]
                 cov_temp += r[k][n] * (X[n] - mean_0[k]) * trans.T
 
             cov_0[k] = cov_temp / N_k
 
-        #calc alpha_0 new
-        alpha_0 = N_k / N
+            #calc alpha_0 new
+            alpha_0[k] = N_k / N
 
         #calc log_likelihood per iteration 
         log_likelihood_it = 0
 
-        for n in range(len(X)):
+        for n in range(X.shape[0]):
             for k in range(K):
                 log_likelihood_it += likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
         
