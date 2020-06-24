@@ -197,7 +197,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
             for k in range(K):
                 log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
         
-        log_likelihood.append(log_likelihood_it)
+        np.append(log_likelihood, log_likelihood_it)
 
         if log_likelihood[-1] == log_likelihood[-2]:
             return alpha_0, mean_0, cov_0, log_likelihood, r
