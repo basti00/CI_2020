@@ -101,7 +101,7 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         alpha_0... initial weight of each component, 1 x nr_components
         mean_0 ... initial mean values, D x nr_components
         cov_0 ...  initial covariance for each component, D x D x nr_components"""
-    
+
     alpha_0 = np.ones((1, nr_components))/nr_components
     mean_0 = np.ones((dimension, nr_components))
     cov_0 = np.ones((dimension, dimension, nr_components))
@@ -150,19 +150,65 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     assert D == mean_0.shape[0]
     #TODO: iteratively compute the posterior and update the parameters
 
-    i = 0
+    r = np.zeros((K, X.shape[0]))
 
-    r = np.zeros((len(X), K))
+    log_likelihood = []
+
+    N = X.shape[0]
+
     for i in range(max_iter):
-        for n in range(len(X)):
+
+        #calc r
+        for n in range(N):
             for k in range(K):
                 r_nenner = 0
                 for k_ in range(K):
-                    r_nenner += alpha_0[i][k_] * likelihood_multivariate_normal(X[n], mean_0.T[i], cov_0.T[i])
+                    print(mean_0.T[k].shape)
+                    print(cov_0.T[k].shape)
+                    r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0.T[k_], cov_0.T[k_])
 
-                r[n][k] = alpha_0[i][k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
-    #TODO: classify all samples after convergence
-    pass
+                r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
+
+        #calc new alpha, mean and cov
+
+
+        for k in range(K):
+            #calc mean_0 new
+            mean_temp = 0
+            N_k = 0
+
+            for n in range(N):
+                mean_temp += r[k][n]*X[n]
+
+                #calc N_k and N for later use
+                N_k += r[k][n]
+
+            mean_0[k] = mean_temp / N_k
+
+            #calc cov_0 new
+            cov_temp = 0
+            for n in range(N):
+                cov_temp += r[k][n] * (X[n] - mean_0[k]) * (X[n] - mean_0[k]).T
+
+            cov_0[k] = cov_temp / N_k
+
+            #calc alpha_0 new
+            alpha_0[k] = N_k / N
+
+        #calc log_likelihood per iteration
+        log_likelihood_it = 0
+
+        for n in range(N):
+            for k in range(K):
+                log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
+
+        log_likelihood.append(log_likelihood_it)
+
+        if log_likelihood[-1] == log_likelihood[-2]:
+            return alpha_0, mean_0, cov_0, log_likelihood, r
+
+    return alpha_0, mean_0, cov_0, log_likelihood, r
+
 #--------------------------------------------------------------------------------
 def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
     """ initializes the k_means algorithm
