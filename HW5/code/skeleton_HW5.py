@@ -105,26 +105,24 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     alpha_0 = np.ones((1, nr_components))/nr_components
     mean_0 = np.ones((dimension, nr_components))
     cov_0 = np.ones((dimension, dimension, nr_components))
+
     print("dimension: ", dimension)
     print("nr_components: ", nr_components)
     print("np.shape(X): ", np.shape(X))
+
     if X is not None:
         mean = np.mean(X)
-        sum = 0
+        summe = 0
         for i, x_n in enumerate(X):
             diff = x_n-mean
             diff = diff.reshape((2,1))
-            #print("mat mult var 1: ",np.matmul(diff, diff.T))
-            #print("mat mult var 2: ",np.matmul(diff.T, diff))
-            sum += np.matmul(diff, diff.T)
-        cov_0 *= (sum/nr_components)
-        mean_t = mean_0.T
-        for i in range(nr_components):
-            dsd = X[np.random.randint(0,nr_components)]
-            #print(dsd)
-            mean_t[i] = dsd
-        mean_0 = mean_t.T
+            summe += np.matmul(diff, diff.T)
 
+        cov = (summe/nr_components)
+        cov_0 = np.tile(cov,(3,1,1)).T
+
+        mean_0 = X[np.random.choice(X.shape[0], nr_components, replace=False)].T
+        
     print(alpha_0.shape)
     print(mean_0.shape)
     print(cov_0.shape)
