@@ -132,18 +132,57 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     D = X.shape[1]
     assert D == mean_0.shape[0]
     #TODO: iteratively compute the posterior and update the parameters
-
-    i = 0
-
+    
     r = np.zeros((len(X), K))
+
+    log_likelihood = []
+
     for i in range(max_iter):
         for n in range(len(X)):
             for k in range(K):
                 r_nenner = 0
                 for k_ in range(K):
-                    r_nenner += alpha_0[i][k_] * likelihood_multivariate_normal(X[n], mean_0.T[i], cov_0.T[i])
+                    r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0.T[k_], cov_0.T[k_])
 
-                r[n][k] = alpha_0[i][k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
+                r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
+
+        N = 0
+        N_k = 0
+        for k in range(K):
+            #calc alpha_0 new
+            mean_temp = 0
+            
+            for n in range(len(X)):
+                mean_temp += r[k][n]*X[n]
+                N_k += r[k][n]
+                N = += r[k][n]
+
+
+            mean_0[k] = mean_temp / N_k
+
+            cov_temp = 0
+            for n in range(len(X)):
+                trans = X[n] * mean_0[k]
+                cov_temp += r[k][n] * (X[n] - mean_0[k]) * trans.T
+
+            cov_0[k] = cov_temp / N_k
+
+        alpha_0 = N_k / N
+
+        log_likelihood_it = 0
+
+        for n in range(len(X)):
+            for k in range(K):
+                log_likelihood_it += likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k])
+        
+        log_likelihood.append(log_likelihood_it)
+
+
+            
+
+
+
+
     #TODO: classify all samples after convergence
     pass
 #--------------------------------------------------------------------------------
