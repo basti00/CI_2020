@@ -122,7 +122,7 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         cov_0 = np.tile(cov,(3,1,1)).T
 
         mean_0 = X[np.random.choice(X.shape[0], nr_components, replace=False)].T
-        
+
     print(alpha_0.shape)
     print(mean_0.shape)
     print(cov_0.shape)
