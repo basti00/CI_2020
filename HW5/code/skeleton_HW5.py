@@ -177,10 +177,13 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
     #TODO: iteratively update the cluster centers
 
     #indices of closest centers for each point
-    nearest_centers = np.zeros((X.shape[0]), dtype=np.int)
+    nearest_centers = np.zeros(X.shape[0], dtype=np.int)
     centers = centers_0.T
+    cumulative_distance = np.ndarray((0,1))
 
     for i in range(max_iter):
+        distance_sum = 0
+
         for x_index, x in enumerate(X):
             # find closest center
             min_dist = np.inf
@@ -188,17 +191,18 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
                 dist = np.linalg.norm(x-center)
                 if dist < min_dist:
                     min_dist = dist
+                    distance_sum+=dist
                     nearest_centers[x_index] = center_index
 
-        # set new centers
-        old_centers = centers
-        centers = np.zeros((K, X.shape[1]))
-        for x_index, center_index in enumerate(nearest_centers):
-            centers[center_index] += 1/len([x for x in nearest_centers if x == center_index]) * X[x_index]
-
-        if np.array_equal(old_centers,centers):
+        if i == 0 or np.abs(distance_sum - cumulative_distance[i-1]) > tol:
+            cumulative_distance = np.append(cumulative_distance, distance_sum)
+            # set new centers
+            centers = np.zeros((K, X.shape[1]))
+            for x_index, center_index in enumerate(nearest_centers):
+                centers[center_index] += 1/len([x for x in nearest_centers if x == center_index]) * X[x_index]
+        else:
             print("Done")
-            return
+            break
         
         plt.scatter(X[nearest_centers==0,0], X[nearest_centers==0,1], label='Iris-Setosa')
         plt.scatter(X[nearest_centers==1,0], X[nearest_centers==1,1], label='Iris-Versicolor')
@@ -210,7 +214,9 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
         plt.legend()
         plt.show()
 
-        print(nearest_centers)
+        print(i, nearest_centers)
+
+    return centers.T, cumulative_distance, nearest_centers
 
 
     #TODO: classify all samples after convergence
