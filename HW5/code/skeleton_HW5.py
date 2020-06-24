@@ -33,13 +33,13 @@ def main():
     nr_components = 3
 
     #TODO set parameters
-    #tol = ...  # tolerance
-    #max_iter = ...  # maximum iterations for GN
+    tol = 0.01  # tolerance
+    max_iter = 200  # maximum iterations for GN
     #nr_components = ... #n number of components
 
     #TODO: implement
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
-    #... = EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+    EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
     #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
     #... = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
 
@@ -102,8 +102,17 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         alpha_0... initial weight of each component, 1 x nr_components
         mean_0 ... initial mean values, D x nr_components
         cov_0 ...  initial covariance for each component, D x D x nr_components"""
+    
     # TODO choose suitable initial values for each scenario
-    pass
+    
+    alpha_0 = np.ones((1, nr_components))
+    mean_0 = np.ones((dimension, nr_components))
+    cov_0 = np.ones((nr_components, dimension, dimension))
+    print(alpha_0)
+    print(mean_0)
+    print(cov_0)
+
+    return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
 def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     """ perform the EM-algorithm in order to optimize the parameters of a GMM
@@ -125,6 +134,16 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     assert D == mean_0.shape[0]
     #TODO: iteratively compute the posterior and update the parameters
 
+    i = 0
+
+    r = np.zeros((len(X), K))
+    for n in range(len(X)):
+        for k in range(K):
+            r_nenne = 0
+            for k_ in range(K):
+                r_nenne += alpha_0[i][k_] * likelihood_multivariate_normal(X[n], mean_0[i], cov_0[i])
+
+            r[n][k] = alpha_0[k][i] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k])
     #TODO: classify all samples after convergence
     pass
 #--------------------------------------------------------------------------------
@@ -222,6 +241,8 @@ def likelihood_multivariate_normal(X, mean, cov, log=False):
    log ... False for likelihood, true for log-likelihood
    """
 
+   print(mean)
+   print(cov)
    dist = multivariate_normal(mean, cov)
    if log is False:
        P = dist.pdf(X)
