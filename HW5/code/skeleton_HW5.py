@@ -34,12 +34,12 @@ def main():
     nr_components = 3
 
     #TODO set parameters
-    tol = 0.01  # tolerance
+    tol = 0.001  # tolerance
     max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    #EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
+    EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
     #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
     #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
@@ -51,14 +51,14 @@ def main():
     dim = 4
     nr_components = 3
 
-    tol = 0.01  # tolerance
+    tol = 0.001  # tolerance
     max_iter = 100  # maximum iterations for GN
     nr_components = 3 #n number of components
 
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
-    eem = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
+    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+    #eem = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
+    #kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
     #TODO: visualize your results by looking at the same slice as in 1)
     plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
@@ -221,8 +221,10 @@ def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
     log_likelihood_it = 0
 
     for n in range(N):
+        temp = 0
         for k in range(K):
-            log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
+            temp += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
+        log_likelihood_it += np.log10(temp)
     return log_likelihood_it
 #--------------------------------------------------------------------------------
 def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
