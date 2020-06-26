@@ -113,7 +113,7 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     if X is not None:
         mean = np.mean(X)
         summe = 0
-        for i, x_n in enumerate(X):
+        for _, x_n in enumerate(X):
             diff = x_n-mean
             diff = diff.reshape((2,1))
             summe += np.matmul(diff, diff.T)
@@ -159,50 +159,14 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
 
     N = X.shape[0]
 
-    for i in range(max_iter):
+    for _ in range(max_iter):
 
-        #calc r
-        for n in range(N):
-            for k in range(K):
-                r_nenner = 0
-                for k_ in range(K):
-                    
-                    #print("MEAN shape: ", mean_0.T[k_].shape)
-                    #print("COV shape: ", cov_0.T[k_].shape)
-                    r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0[k_], cov_0[k_])
+        r = em_expectation(N,K,alpha_0, X,mean_0, cov_0)
 
-                r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
-
-        #calc new alpha, mean and cov
-        for k in range(K):
-            #calc mean_0 new
-            mean_temp = 0
-            N_k = 0
-
-            for n in range(N):
-                mean_temp += r[k][n]*X[n]
-
-                #calc N_k and N for later use
-                N_k += r[k][n]
-
-            mean_0[k] = mean_temp / N_k
-
-            #calc cov_0 new
-            cov_temp = 0
-            for n in range(N):
-                cov_temp += r[k][n] * (X[n] - mean_0[k]) * (X[n] - mean_0[k]).T
-
-            cov_0[k] = cov_temp / N_k
-
-            #calc alpha_0 new
-            alpha_0[k] = N_k / N
+        em_maximization(N,K,alpha_0, X,mean_0, cov_0, r)
 
         #calc log_likelihood per iteration
-        log_likelihood_it = 0
-
-        for n in range(N):
-            for k in range(K):
-                log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
+        log_likelihood_it = em_likelyhood_calc(N,K,alpha_0, X,mean_0, cov_0)
         
         log_likelihood.append(log_likelihood_it)
         if len(log_likelihood) > 1:
@@ -212,6 +176,55 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
 
     return alpha_0, mean_0, cov_0, log_likelihood, r
 
+def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
+    r = np.zeros((K, X.shape[0]))
+    #calc r
+    for n in range(N):
+        for k in range(K):
+            r_nenner = 0
+            for k_ in range(K):
+                
+                #print("MEAN shape: ", mean_0.T[k_].shape)
+                #print("COV shape: ", cov_0.T[k_].shape)
+                r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0[k_], cov_0[k_])
+
+            r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
+    return r
+    
+
+def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
+    #calc new alpha, mean and cov
+    for k in range(K):
+        #calc mean_0 new
+        mean_temp = 0
+        N_k = 0
+
+        for n in range(N):
+            mean_temp += r[k][n]*X[n]
+
+            #calc N_k and N for later use
+            N_k += r[k][n]
+
+        mean_0[k] = mean_temp / N_k
+
+        #calc cov_0 new
+        cov_temp = 0
+        for n in range(N):
+            cov_temp += r[k][n] * (X[n] - mean_0[k]) * (X[n] - mean_0[k]).T
+
+        cov_0[k] = cov_temp / N_k
+
+        #calc alpha_0 new
+        alpha_0[k] = N_k / N
+
+def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
+    #calc log_likelihood per iteration
+    log_likelihood_it = 0
+
+    for n in range(N):
+        for k in range(K):
+            log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
+    return log_likelihood_it
 #--------------------------------------------------------------------------------
 def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
     """ initializes the k_means algorithm
