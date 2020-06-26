@@ -148,6 +148,10 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     assert D == mean_0.shape[0]
     #TODO: iteratively compute the posterior and update the parameters
 
+    mean_0 = mean_0.T
+    cov_0 = cov_0.T
+    alpha_0 = alpha_0.T
+
     r = np.zeros((K, X.shape[0]))
 
     log_likelihood = []
@@ -161,15 +165,14 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
             for k in range(K):
                 r_nenner = 0
                 for k_ in range(K):
-                    print(mean_0.T[k].shape)
-                    print(cov_0.T[k].shape)
-                    r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0.T[k_], cov_0.T[k_])
+                    
+                    #print("MEAN shape: ", mean_0.T[k_].shape)
+                    #print("COV shape: ", cov_0.T[k_].shape)
+                    r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0[k_], cov_0[k_])
 
                 r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
 
         #calc new alpha, mean and cov
-
-
         for k in range(K):
             #calc mean_0 new
             mean_temp = 0
@@ -199,10 +202,11 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
         for n in range(N):
             for k in range(K):
                 log_likelihood_it += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
-
+        
         log_likelihood.append(log_likelihood_it)
-
-        if log_likelihood[-1] == log_likelihood[-2]:
+        if len(log_likelihood) > 1:
+            print(np.abs(log_likelihood[-1] - log_likelihood[-2]))
+        if len(log_likelihood) > 1 and np.abs(log_likelihood[-1] - log_likelihood[-2]) < tol:
             return alpha_0, mean_0, cov_0, log_likelihood, r
 
     return alpha_0, mean_0, cov_0, log_likelihood, r
@@ -281,7 +285,7 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
 
 
     #TODO: classify all samples after convergence
-    return
+
 #--------------------------------------------------------------------------------
 def PCA(data,nr_dimensions=None, whitening=False):
     """ perform PCA and reduce the dimension of the data (D) to nr_dimensions
@@ -400,8 +404,6 @@ def likelihood_multivariate_normal(X, mean, cov, log=False):
    log ... False for likelihood, true for log-likelihood
    """
 
-   print(mean)
-   print(cov)
    dist = multivariate_normal(mean, cov)
    if log is False:
        P = dist.pdf(X)
