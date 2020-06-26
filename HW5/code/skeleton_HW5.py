@@ -302,62 +302,20 @@ def PCA(data,nr_dimensions=None, whitening=False):
     else:
         dim = 2
 
-    print(data.shape, " : The matrix shape")
     data = data.T
-    assert data.shape == (4, 150), "The matrix has not the dimensions 4,150"
+    cov_matrix = np.cov([data[0, :], data[1, :], data[2, :], data[3, :]])
 
-    mean_x = np.mean(data[0, :])
-    mean_y = np.mean(data[1, :])
-    mean_z = np.mean(data[2, :])
-    mean_w = np.mean(data[3, :])
+    eig_values, eig_vector = np.linalg.eig(cov_matrix)
 
-    mean_vector = np.array([[mean_x], [mean_y], [mean_z], [mean_w]])
+    eigs = [(np.abs(eig_values[i]), eig_vector[:, i]) for i in range(len(eig_values))]
+    eigs.sort(key=lambda x: x[0], reverse=True)
 
-    print('Mean Vector:\n', mean_vector)
+    transform_mat = np.hstack((eigs[0][1].reshape(4, 1), -eigs[1][1].reshape(4, 1))).T
+    transformed = transform_mat.dot(data)
 
-    cov_mat = np.cov([data[0, :], data[1, :], data[2, :], data[3, :]])
-    print('Covariance Matrix:\n', cov_mat)
+    #TODO calc covariance
 
-    # eigenvectors and eigenvalues for the from the covariance matrix
-    eig_val_cov, eig_vec_cov = np.linalg.eig(cov_mat)
-
-    for i in range(len(eig_val_cov)):
-        eigvec_cov = eig_vec_cov[:, i].reshape(1, 4).T
-
-        print('Eigenvector {}: \n{}'.format(i + 1, eigvec_cov))
-        print('Eigenvalue {} from covariance matrix: {}'.format(i + 1, eig_val_cov[i]))
-        print(40 * '-')
-
-    ###### check if problems:
-    for i in range(len(eig_val_cov)):
-        eigv = eig_vec_cov[:, i].reshape(1, 4).T
-        np.testing.assert_array_almost_equal(cov_mat.dot(eigv), eig_val_cov[i] * eigv,
-                                             decimal=6, err_msg='', verbose=True)
-    ###################
-
-    for ev in eig_vec_cov:
-        np.testing.assert_array_almost_equal(1.0, np.linalg.norm(ev))
-        # instead of 'assert' because of rounding errors
-
-    # Make a list of (eigenvalue, eigenvector) tuples
-    eig_pairs = [(np.abs(eig_val_cov[i]), eig_vec_cov[:, i]) for i in range(len(eig_val_cov))]
-
-    # Sort the (eigenvalue, eigenvector) tuples from high to low
-    eig_pairs.sort(key=lambda x: x[0], reverse=True)
-
-    # Visually confirm that the list is correctly sorted by decreasing eigenvalues
-    print("sorted eigenvalues:\n")
-    for i in eig_pairs:
-        print(i[0])
-
-    matrix_w = np.hstack((eig_pairs[0][1].reshape(4, 1), -eig_pairs[1][1].reshape(4, 1)))
-    print('Matrix W:\n', matrix_w)
-
-    transformed = matrix_w.T.dot(data)
-    assert transformed.shape == (2, 150), "The matrix is not 2x150 dimensional."
-    print("transformed Matrix: \n", transformed)
-    #TODO: Have a look at the associated eigenvalues and compute the amount of varianced explained
-    return transformed.T, 10
+    return transformed.T, 666666
 
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
