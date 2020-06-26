@@ -21,9 +21,10 @@ def main():
     x_4dim = data
 
     #TODO: implement PCA
-    #x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
+    x_2dim_pca, variance = PCA(data,nr_dimensions=2,whitening=False)
 
     ## (c) visually inspect the data with the provided function (see example below)
+    plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset")
     plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
@@ -37,9 +38,8 @@ def main():
     max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
-    #TODO: implement
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
+    #EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
     #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
     #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
@@ -51,18 +51,17 @@ def main():
     dim = 4
     nr_components = 3
 
-    #TODO set parameters
-    #tol = ...  # tolerance
-    #max_iter = ...  # maximum iterations for GN
-    #nr_components = ... #n number of components
+    tol = 0.01  # tolerance
+    max_iter = 100  # maximum iterations for GN
+    nr_components = 3 #n number of components
 
-    #TODO: implement
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
-    #... = EM(x_2dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    #... = k_means(x_2dim,nr_components, initial_centers, max_iter, tol)
+    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+    eem = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
+    kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
     #TODO: visualize your results by looking at the same slice as in 1)
+    plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
 
     #------------------------
@@ -316,11 +315,21 @@ def PCA(data,nr_dimensions=None, whitening=False):
     else:
         dim = 2
 
-    #TODO: Estimate the principal components and transform the data
-    # using the first nr_dimensions principal_components
+    data = data.T
+    cov_matrix = np.cov([data[0, :], data[1, :], data[2, :], data[3, :]])
 
+    eig_values, eig_vector = np.linalg.eig(cov_matrix)
 
-    #TODO: Have a look at the associated eigenvalues and compute the amount of varianced explained
+    eigs = [(np.abs(eig_values[i]), eig_vector[:, i]) for i in range(len(eig_values))]
+    eigs.sort(key=lambda x: x[0], reverse=True)
+
+    transform_mat = np.hstack((eigs[0][1].reshape(4, 1), -eigs[1][1].reshape(4, 1))).T
+    transformed = transform_mat.dot(data)
+
+    #TODO calc covariance
+
+    return transformed.T, 666666
+
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 # Helper Functions
