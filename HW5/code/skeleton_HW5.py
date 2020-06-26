@@ -110,15 +110,13 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     print("np.shape(X): ", np.shape(X))
     if X is not None:
         mean = np.mean(X)
-        sum = 0
+        summand = 0
         for i, x_n in enumerate(X):
             diff = x_n-mean
             diff = diff.reshape((2,1))
-            #print("mat mult var 1: ",np.matmul(diff, diff.T))
-            #print("mat mult var 2: ",np.matmul(diff.T, diff))
-            sum += np.matmul(diff, diff.T)
-            print(sum.shape)
-        cov_0 *= (sum/nr_components)
+            summand += np.matmul(diff, diff.T)
+        for i in range(cov_0.shape[-1]):
+            cov_0[...,i] = (summand/nr_components)
         mean_t = mean_0.T
         for i in range(nr_components):
             dsd = X[np.random.randint(0,nr_components)]
@@ -165,8 +163,10 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
             for k in range(K):
                 r_nenner = 0
                 for k_ in range(K):
-                    print(mean_0.T[k].shape)
-                    print(cov_0.T[k].shape)
+                    
+                    print("MEAN shape: ", mean_0.T[k].shape)
+                    mean_0 = mean_0.reshape((2, 1))
+                    print("COV shape: ", cov_0.T[k].shape)
                     r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0.T[k_], cov_0.T[k_])
 
                 r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
@@ -285,7 +285,7 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
 
 
     #TODO: classify all samples after convergence
-    return
+
 #--------------------------------------------------------------------------------
 def PCA(data,nr_dimensions=None, whitening=False):
     """ perform PCA and reduce the dimension of the data (D) to nr_dimensions
