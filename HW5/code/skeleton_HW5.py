@@ -21,9 +21,10 @@ def main():
     x_4dim = data
 
     #TODO: implement PCA
-    #x_2dim_pca = PCA(data,nr_dimensions=2,whitening=False)
+    x_2dim_pca, variance = PCA(data,nr_dimensions=2,whitening=False)
 
     ## (c) visually inspect the data with the provided function (see example below)
+    plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset")
     plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
@@ -37,9 +38,8 @@ def main():
     max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
-    #TODO: implement
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
+    #EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
     #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
     #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
@@ -51,18 +51,17 @@ def main():
     dim = 4
     nr_components = 3
 
-    #TODO set parameters
-    #tol = ...  # tolerance
-    #max_iter = ...  # maximum iterations for GN
-    #nr_components = ... #n number of components
+    tol = 0.01  # tolerance
+    max_iter = 100  # maximum iterations for GN
+    nr_components = 3 #n number of components
 
-    #TODO: implement
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
-    #... = EM(x_2dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    #... = k_means(x_2dim,nr_components, initial_centers, max_iter, tol)
+    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+    eem = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
+    kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
     #TODO: visualize your results by looking at the same slice as in 1)
+    plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
 
     #------------------------
@@ -299,11 +298,63 @@ def PCA(data,nr_dimensions=None, whitening=False):
     else:
         dim = 2
 
-    #TODO: Estimate the principal components and transform the data
-    # using the first nr_dimensions principal_components
+    print(data.shape, " : The matrix shape")
+    data = data.T
+    assert data.shape == (4, 150), "The matrix has not the dimensions 4,150"
 
+    mean_x = np.mean(data[0, :])
+    mean_y = np.mean(data[1, :])
+    mean_z = np.mean(data[2, :])
+    mean_w = np.mean(data[3, :])
 
+    mean_vector = np.array([[mean_x], [mean_y], [mean_z], [mean_w]])
+
+    print('Mean Vector:\n', mean_vector)
+
+    cov_mat = np.cov([data[0, :], data[1, :], data[2, :], data[3, :]])
+    print('Covariance Matrix:\n', cov_mat)
+
+    # eigenvectors and eigenvalues for the from the covariance matrix
+    eig_val_cov, eig_vec_cov = np.linalg.eig(cov_mat)
+
+    for i in range(len(eig_val_cov)):
+        eigvec_cov = eig_vec_cov[:, i].reshape(1, 4).T
+
+        print('Eigenvector {}: \n{}'.format(i + 1, eigvec_cov))
+        print('Eigenvalue {} from covariance matrix: {}'.format(i + 1, eig_val_cov[i]))
+        print(40 * '-')
+
+    ###### check if problems:
+    for i in range(len(eig_val_cov)):
+        eigv = eig_vec_cov[:, i].reshape(1, 4).T
+        np.testing.assert_array_almost_equal(cov_mat.dot(eigv), eig_val_cov[i] * eigv,
+                                             decimal=6, err_msg='', verbose=True)
+    ###################
+
+    for ev in eig_vec_cov:
+        np.testing.assert_array_almost_equal(1.0, np.linalg.norm(ev))
+        # instead of 'assert' because of rounding errors
+
+    # Make a list of (eigenvalue, eigenvector) tuples
+    eig_pairs = [(np.abs(eig_val_cov[i]), eig_vec_cov[:, i]) for i in range(len(eig_val_cov))]
+
+    # Sort the (eigenvalue, eigenvector) tuples from high to low
+    eig_pairs.sort(key=lambda x: x[0], reverse=True)
+
+    # Visually confirm that the list is correctly sorted by decreasing eigenvalues
+    print("sorted eigenvalues:\n")
+    for i in eig_pairs:
+        print(i[0])
+
+    matrix_w = np.hstack((eig_pairs[0][1].reshape(4, 1), -eig_pairs[1][1].reshape(4, 1)))
+    print('Matrix W:\n', matrix_w)
+
+    transformed = matrix_w.T.dot(data)
+    assert transformed.shape == (2, 150), "The matrix is not 2x150 dimensional."
+    print("transformed Matrix: \n", transformed)
     #TODO: Have a look at the associated eigenvalues and compute the amount of varianced explained
+    return transformed.T, 10
+
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 # Helper Functions
