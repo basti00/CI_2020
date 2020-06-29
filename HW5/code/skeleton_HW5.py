@@ -24,8 +24,8 @@ def main():
     x_2dim_pca, variance = PCA(data,nr_dimensions=2,whitening=False)
 
     ## (c) visually inspect the data with the provided function (see example below)
-    plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset")
-    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    # plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    # plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
@@ -34,18 +34,44 @@ def main():
     nr_components = 3
 
     #TODO set parameters
-    tol = 0.001  # tolerance
+    tol = 0.0001  # tolerance
     max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
-    #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
-    #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
+    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim_pca)
+    (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim_pca,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+    # initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim_pca)
+    # final_centers, cumulative_distance, labels_2dim = k_means(x_2dim_pca, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
     #TODO visualize your results
 
-    plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
+    # plt.plot(cumulative_distance)
+    # plt.xlabel("Iterations")
+    # plt.ylabel("Distance")
+    # plt.title("k-means cumulative distance")
+    # plt.show()
+
+    
+    # # reassign labels for kmeans
+    # print(reassign_class_labels(labels_2dim))
+    # new_labels = reassign_class_labels(labels_2dim)
+    # reshuffled_labels =np.zeros_like(labels_2dim)
+    # reshuffled_labels[labels_2dim==0] = new_labels[0]
+    # reshuffled_labels[labels_2dim==1] = new_labels[1]
+    # reshuffled_labels[labels_2dim==2] = new_labels[2]
+
+    # # print kmeans plot
+    # plt.scatter(x_2dim_pca[reshuffled_labels==0,0], x_2dim_pca[reshuffled_labels==0,1], label='Iris-Setosa')
+    # plt.scatter(x_2dim_pca[reshuffled_labels==1,0], x_2dim_pca[reshuffled_labels==1,1], label='Iris-Versicolor')
+    # plt.scatter(x_2dim_pca[reshuffled_labels==2,0], x_2dim_pca[reshuffled_labels==2,1], label='Iris-Virgnica')
+    # plt.scatter(final_centers[0], final_centers[1], label='Centers', marker="x", color="black")
+    # plt.xlabel(feature_names[0])
+    # plt.ylabel(feature_names[2])
+    # plt.title("k-means")
+    # plt.legend()
+    # plt.show()
+
+    plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
@@ -107,10 +133,6 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     mean_0 = np.ones((dimension, nr_components))
     cov_0 = np.ones((dimension, dimension, nr_components))
 
-    print("dimension: ", dimension)
-    print("nr_components: ", nr_components)
-    print("np.shape(X): ", np.shape(X))
-
     if X is not None:
         mean = np.mean(X)
         summe = 0
@@ -123,10 +145,6 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         cov_0 = np.tile(cov,(3,1,1)).T
 
         mean_0 = X[np.random.choice(X.shape[0], nr_components, replace=False)].T
-
-    #print(alpha_0.shape)
-    #print(mean_0.shape)
-    print(cov_0.T[0])
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
@@ -208,7 +226,6 @@ def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
             r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
     return r
     
-
 def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
     #calc new alpha, mean and cov
     for k in range(K):
@@ -296,6 +313,7 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
                     distance_sum+=dist
                     nearest_centers[x_index] = center_index
 
+        print(i, np.abs(distance_sum))
         if i == 0 or np.abs(distance_sum - cumulative_distance[i-1]) > tol:
             cumulative_distance = np.append(cumulative_distance, distance_sum)
             # set new centers
@@ -305,18 +323,6 @@ def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
         else:
             print("Done")
             break
-        
-        plt.scatter(X[nearest_centers==0,0], X[nearest_centers==0,1], label='Iris-Setosa')
-        plt.scatter(X[nearest_centers==1,0], X[nearest_centers==1,1], label='Iris-Versicolor')
-        plt.scatter(X[nearest_centers==2,0], X[nearest_centers==2,1], label='Iris-Virgnica')
-        plt.scatter(centers.T[0], centers.T[1], label='Centers')
-        plt.xlabel(feature_names[0])
-        plt.ylabel(feature_names[2])
-        plt.title("test")
-        plt.legend()
-        plt.show()
-
-        print(i, nearest_centers)
 
     return centers.T, cumulative_distance, nearest_centers
 
@@ -379,9 +385,6 @@ def plot_iris_data(data, labels, x_axis, y_axis, title):
         x_axis... label for the x_axis
         y_axis... label for the y_axis
         title...  title of the plot"""
-
-    print(data.shape)
-    print(labels.shape)
 
     plt.scatter(data[labels==0,0], data[labels==0,1], label='Iris-Setosa')
     plt.scatter(data[labels==1,0], data[labels==1,1], label='Iris-Versicolor')
@@ -517,5 +520,5 @@ def sanity_checks():
 #--------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    #sanity_checks()
+    sanity_checks()
     main()
