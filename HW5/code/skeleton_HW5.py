@@ -25,7 +25,6 @@ def main():
 
     ## (c) visually inspect the data with the provided function (see example below)
     plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset")
-    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
@@ -38,14 +37,26 @@ def main():
     max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
-    #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
-    #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
+    if False:
+        plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
-    #TODO visualize your results
+        (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
+        (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+        #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
+        #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
-    plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
+        #TODO visualize your results
+
+
+        plt.plot(log_likelyhood)
+        plt.show()
+
+        plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+
+        for k in range(nr_components):
+            plot_gauss_contour(mean_0[k], cov_0[k], 4, 9, 0, 8 ,20)
+
+        plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
@@ -53,18 +64,27 @@ def main():
     dim = 4
     nr_components = 3
 
-    tol = 0.01  # tolerance
+    tol = 0.001  # tolerance
     max_iter = 100  # maximum iterations for GN
     nr_components = 3 #n number of components
 
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
-    #eem = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    #kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
-    #TODO: visualize your results by looking at the same slice as in 1)
-    
 
+    if True:
+
+        plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset 4 Dim")
+
+        (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
+        (alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+        #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
+        #kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
+
+        #TODO: visualize your results by looking at the same slice as in 1)
+        
+        plt.plot(log_likelyhood)
+        plt.show()
+
+        plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
 
     #------------------------
     # 3) Perform PCA to reduce the dimension to 2 while preserving most of the variance.
@@ -107,26 +127,40 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
     mean_0 = np.ones((dimension, nr_components))
     cov_0 = np.ones((dimension, dimension, nr_components))
 
-    print("dimension: ", dimension)
-    print("nr_components: ", nr_components)
-    print("np.shape(X): ", np.shape(X))
+    #print("dimension: ", dimension)
+    #print("nr_components: ", nr_components)
+    #print("np.shape(X): ", np.shape(X))
 
     if X is not None:
         mean = np.mean(X)
         summe = 0
         for _, x_n in enumerate(X):
             diff = x_n-mean
-            diff = diff.reshape((2,1))
+            #print("DIFF shape", diff.shape)
+            diff = diff.reshape((dimension,1))
             summe += np.matmul(diff, diff.T)
 
         cov = (summe/nr_components)
-        cov_0 = np.tile(cov,(3,1,1)).T
+        cov_0 = np.tile(cov,(nr_components,1,1)).T
 
         mean_0 = X[np.random.choice(X.shape[0], nr_components, replace=False)].T
 
-    #print(alpha_0.shape)
-    #print(mean_0.shape)
-    print(cov_0.T[0])
+    #Best values for plot
+    if False:
+        mean_0[0][0] = 5.00600066
+        mean_0[0][1] = 5.96810282
+        mean_0[0][2] = 6.535967
+
+        mean_0[1][0] = 1.46199854
+        mean_0[1][1] = 4.01009197
+        mean_0[1][2] = 5.49963309
+
+        cov_0 = [[[0.12176427, 0.28003145, 0.42380503],[0.01602834, 0.20985688, 0.3422579 ]],
+                [[0.01602834, 0.20985688, 0.3422579 ],[0.02955546, 0.23795915, 0.35377924]]]
+
+        cov_0 = np.array(cov_0)
+
+    print("COV:", cov_0)
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
@@ -172,7 +206,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
         log_likelihood.append(log_likelihood_it)
         if len(log_likelihood) > 1:
             #print("All log:", log_likelihood)
-            print(i, np.abs(log_likelihood[-1] - log_likelihood[-2]))
+            #print("Iteration:", i, "Abs:", np.abs(log_likelihood[-1] - log_likelihood[-2]), "Last Log Like:", log_likelihood[-1])
             pass
         if len(log_likelihood) > 1 and np.abs(log_likelihood[-1] - log_likelihood[-2]) < tol:
             break
@@ -189,8 +223,6 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
 
     print(reassign_class_labels(labels))
 
-    plt.plot(log_likelihood)
-    plt.show()
     return alpha_0, mean_0, cov_0, log_likelihood, labels
 
 def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
@@ -386,6 +418,10 @@ def plot_iris_data(data, labels, x_axis, y_axis, title):
     plt.scatter(data[labels==0,0], data[labels==0,1], label='Iris-Setosa')
     plt.scatter(data[labels==1,0], data[labels==1,1], label='Iris-Versicolor')
     plt.scatter(data[labels==2,0], data[labels==2,1], label='Iris-Virgnica')
+    #plt.scatter(data[labels==0,0], data[labels==0,1], label='nr_component 1')
+    #plt.scatter(data[labels==1,0], data[labels==1,1], label='nr_component 2')
+    #plt.scatter(data[labels==2,0], data[labels==2,1], label='nr_component 3')
+    #plt.scatter(data[labels==3,0], data[labels==3,1], label='nr_component 4')
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
     plt.title(title)
@@ -435,7 +471,7 @@ def plot_gauss_contour(mu,cov,xmin,xmax,ymin,ymax,nr_points,title="Title"):
     plt.plot([mu[0]],[mu[1]],'r+') # plot the mean as a single point
     CS = plt.contour(X, Y, Z)
     plt.clabel(CS, inline=1, fontsize=10)
-    plt.show()
+    #plt.show()
     return
 #--------------------------------------------------------------------------------
 def sample_discrete_pmf(X, PM, N):
