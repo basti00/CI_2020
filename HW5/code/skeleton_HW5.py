@@ -411,7 +411,7 @@ def PCA(data,nr_dimensions=None, whitening=False):
     eigs = [(np.abs(eig_values[i]), eig_vector[:, i]) for i in range(len(eig_values))]
     eigs.sort(key=lambda x: x[0], reverse=True)
 
-    transform_mat = np.hstack(((1 - 2*(not whitening))*eigs[0][1].reshape(4, 1), (1 - 2*whitening)*eigs[1][1].reshape(4, 1))).T
+    transform_mat = np.hstack((eigs[0][1].reshape(4, 1), -eigs[1][1].reshape(4, 1))).T
     transformed = transform_mat.dot(data)
 
     var_aft = np.var(transformed)
