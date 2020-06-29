@@ -129,12 +129,12 @@ def main():
             plt.plot(log_likelyhood)
             plt.show()
 
-            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+            plot_iris_data(x_2dim_pca,labels_pca, feature_names[0], feature_names[2], "Iris Dataset EM PCA")
 
             for k in range(nr_components):
                 plot_gauss_contour(mean_0[k], cov_0[k], 4, 9, 0, 8 ,20)
 
-            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+            plot_iris_data(x_2dim_pca,labels_pca, feature_names[0], feature_names[2], "Iris Dataset EM PCA")
 
         if show_kmean:
             tol = 0.0001
@@ -172,7 +172,6 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
         summe = 0
         for _, x_n in enumerate(X):
             diff = x_n-mean
-            #print("DIFF shape", diff.shape)
             diff = diff.reshape((dimension,1))
             summe += np.matmul(diff, diff.T)
 
@@ -195,8 +194,6 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
                 [[0.01602834, 0.20985688, 0.3422579 ],[0.02955546, 0.23795915, 0.35377924]]]
 
         cov_0 = np.array(cov_0)
-
-    print("COV:", cov_0)
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
@@ -241,8 +238,6 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
         
         log_likelihood.append(log_likelihood_it)
         if len(log_likelihood) > 1:
-            #print("All log:", log_likelihood)
-            #print("Iteration:", i, "Abs:", np.abs(log_likelihood[-1] - log_likelihood[-2]), "Last Log Like:", log_likelihood[-1])
             pass
         if len(log_likelihood) > 1 and np.abs(log_likelihood[-1] - log_likelihood[-2]) < tol:
             break
@@ -254,11 +249,6 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
             value[k] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k])
         labels[n] = np.argmax(value)
 
-    print(real_labels)
-    print(labels)
-
-    print(reassign_class_labels(labels))
-
     return alpha_0, mean_0, cov_0, log_likelihood, labels
 
 #--------------------------------------------------------------------------------
@@ -269,9 +259,6 @@ def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
         for k in range(K):
             r_nenner = 0
             for k_ in range(K):
-                
-                #print("MEAN shape: ", mean_0.T[k_].shape)
-                #print("COV shape: ", cov_0.T[k_].shape)
                 r_nenner += alpha_0[k_] * likelihood_multivariate_normal(X[n], mean_0[k_], cov_0[k_])
 
             r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
@@ -302,10 +289,6 @@ def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
 
         #calc alpha_0 new
         alpha_0[k] = N_k / N
-
-        #print("Alpha:", alpha_0)
-        #print("Mean:", mean_0)
-        #print("Cov:", cov)2
 
 #--------------------------------------------------------------------------------
 def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
@@ -365,7 +348,6 @@ def k_means(X,K, centers_0, max_iter, tol):
                     distance_sum+=dist
                     nearest_centers[x_index] = center_index
 
-        print(i, np.abs(distance_sum))
         if i == 0 or np.abs(distance_sum - cumulative_distance[i-1]) > tol:
             cumulative_distance = np.append(cumulative_distance, distance_sum)
             # set new centers
@@ -373,7 +355,6 @@ def k_means(X,K, centers_0, max_iter, tol):
             for x_index, center_index in enumerate(nearest_centers):
                 centers[center_index] += 1/len([x for x in nearest_centers if x == center_index]) * X[x_index]
         else:
-            print("Done")
             break
 
     return centers.T, cumulative_distance, nearest_centers
@@ -420,12 +401,6 @@ def PCA(data,nr_dimensions=None, whitening=False):
     var_aft = np.var(transformed)
 
     variance_explained = (eig_values[0] + eig_values[1]) / np.sum(eig_values)
-    print("var before:\n", var_bef)
-    print("variance_explained:\n", variance_explained)
-    print("eig_values:\n", eig_values)
-    print("eig_vector:\n", eig_vector)
-    print("eigs:\n", eigs)
-    #TODO calc covariance
 
     return transformed.T, variance_explained
 
@@ -558,7 +533,7 @@ def sample_discrete_pmf(X, PM, N):
     return np.random.permutation(y) # permutation of all samples
 #--------------------------------------------------------------------------------
 def reassign_class_labels(labels):
-    """ reassigns the class labels in order to make the result comparable.
+    """ reassi    #TODO calc covariancegns the class labels in order to make the result comparable.
     new_labels contains the labels that can be compared to the provided data,
     i.e., new_labels[i] = j means that i corresponds to j.
     Input:
