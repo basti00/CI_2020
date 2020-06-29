@@ -12,7 +12,7 @@ from sklearn import datasets
 # Assignment 5
 def main():
 
-    number = 1
+    scenario = 1
     EM = True
     KMean = False
 
@@ -36,78 +36,104 @@ def main():
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
-    if number == 1:
-        scenario = 1
+    if scenario == 1:
         dim = 2
         nr_components = 3
 
-        #TODO set parameters
-        tol = 0.0001  # tolerance
         max_iter = 100  # maximum iterations for GN
 
-        #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
-
         if EM:
+            tol = 0.001
+
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
             (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
         
+            # Plot for EM
+            plt.plot(log_likelyhood)
+            plt.show()
+
+            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+
+            for k in range(nr_components):
+                plot_gauss_contour(mean_0[k], cov_0[k], 4, 9, 0, 8 ,20)
+
+            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+
         if KMean:
+            tol = 0.0001
+
             initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
             final_centers, cum_dist, km_labels_2dim = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
 
             # Plots for k-means
-            plot_kmeans(x_2dim, km_labels_2dim, feature_names[0], feature_names[2], final_centers, "k-means")
+            plt.plot(cum_dist)
+            plt.xlabel("Iterations")
+            plt.ylabel("Distance")
+            plt.title("k-means cumulative distance")
+            plt.show()
 
-        # Plots for EM
-        #plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
+            plot_kmeans(x_2dim, km_labels_2dim, feature_names[0], feature_names[2], final_centers, "k-means")
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
-    if number == 2:
-        scenario = 2
+    if scenario == 2:
         dim = 4
         nr_components = 3
 
-        tol = 0.0001  # tolerance
         max_iter = 100  # maximum iterations for GN
 
-        #plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset 4 Dim")
-
         if EM:
+            tol = 0.001
+
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
             (alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
         
+
+            # Plot for EM
+            plt.plot(log_likelyhood)
+            plt.show()
+
+            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
+
+
         if KMean:
+            tol = 0.0001
+
             initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_4dim)
             final_centers, cum_dist, km_labels_4dim = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
         
             # Plots for k-means
             plot_kmeans(x_4dim, km_labels_4dim, feature_names[0], feature_names[2], final_centers, "k-means 4 Dimensions")
-        
-        # Plots for EM
-        # plt.plot(log_likelyhood)
-        # plt.show()
 
-        # plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
 
     #------------------------
     # 3) Perform PCA to reduce the dimension to 2 while preserving most of the variance.
     # Then, evaluate the EM- and the KMeans- Algorithm  on the transformed data
-    if number == 3:
-        scenario = 3
+    if scenario == 3:
         dim = 2
         nr_components = 3
 
-        #TODO set parameters
-        #tol = ...  # tolerance
-        #max_iter = ...  # maximum iterations for GN
-        #nr_components = ... #n number of components
+        max_iter = 100  # maximum iterations for GN
+        nr_components = 3 #n number of components
 
         #TODO: implement
         if EM:
+            tol = 0.001
+
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
             (alpha_0, mean_0, cov_0, log_likelyhood, labels_pca) = EM(x_2dim_pca, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
         
+            # Plot for EM
+            plt.plot(log_likelyhood)
+            plt.show()
+
+            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+
+            for k in range(nr_components):
+                plot_gauss_contour(mean_0[k], cov_0[k], 4, 9, 0, 8 ,20)
+
+            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
+
         if KMean:
             #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
             #... = k_means(x_2dim_pca, nr_components, initial_centers, max_iter, tol)
@@ -229,6 +255,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
 
     return alpha_0, mean_0, cov_0, log_likelihood, labels
 
+#--------------------------------------------------------------------------------
 def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
     r = np.zeros((K, X.shape[0]))
     #calc r
@@ -243,7 +270,8 @@ def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
 
             r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
     return r
-    
+
+#--------------------------------------------------------------------------------
 def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
     #calc new alpha, mean and cov
     for k in range(K):
@@ -273,6 +301,7 @@ def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
         #print("Mean:", mean_0)
         #print("Cov:", cov)2
 
+#--------------------------------------------------------------------------------
 def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
     #calc log_likelihood per iteration
     log_likelihood_it = 0
@@ -283,6 +312,7 @@ def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
             temp += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k],log=False)
         log_likelihood_it += np.log(temp)
     return log_likelihood_it
+
 #--------------------------------------------------------------------------------
 def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
     """ initializes the k_means algorithm
@@ -393,6 +423,7 @@ def PCA(data,nr_dimensions=None, whitening=False):
 
     return transformed.T, variance_explained
 
+#--------------------------------------------------------------------------------
 def plot_kmeans(data, labels, x_axis, y_axis, centers, title):
     #reassign labels for kmeans
     new_labels = reassign_class_labels(labels)
