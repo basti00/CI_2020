@@ -48,6 +48,12 @@ def main():
 
 
     # Plots for k-means
+    plt.plot(cum_dist)
+    plt.xlabel("Iterations")
+    plt.ylabel("Distance")
+    plt.title("k-means cumulative distance")
+    plt.show()
+
     plot_kmeans(x_2dim, km_labels_2dim, feature_names[0], feature_names[2], final_centers, "k-means")
 
     # Plots for EM
@@ -72,6 +78,12 @@ def main():
     #TODO: visualize your results by looking at the same slice as in 1)
     
     # Plots for k-means
+    plt.plot(cum_dist)
+    plt.xlabel("Iterations")
+    plt.ylabel("Distance")
+    plt.title("k-means cumulative distance 4 Dimensions")
+    plt.show()
+
     plot_kmeans(x_4dim, km_labels_4dim, feature_names[0], feature_names[2], final_centers, "k-means 4 Dimensions")
     
     # Plots for EM
@@ -215,6 +227,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
 
     return alpha_0, mean_0, cov_0, log_likelihood, labels
 
+#--------------------------------------------------------------------------------
 def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
     r = np.zeros((K, X.shape[0]))
     #calc r
@@ -229,7 +242,8 @@ def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
 
             r[k][n] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k]) / r_nenner
     return r
-    
+
+#--------------------------------------------------------------------------------
 def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
     #calc new alpha, mean and cov
     for k in range(K):
@@ -259,6 +273,7 @@ def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
         #print("Mean:", mean_0)
         #print("Cov:", cov)2
 
+#--------------------------------------------------------------------------------
 def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
     #calc log_likelihood per iteration
     log_likelihood_it = 0
@@ -269,6 +284,7 @@ def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
             temp += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k],log=False)
         log_likelihood_it += np.log(temp)
     return log_likelihood_it
+
 #--------------------------------------------------------------------------------
 def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
     """ initializes the k_means algorithm
@@ -379,6 +395,7 @@ def PCA(data,nr_dimensions=None, whitening=False):
 
     return transformed.T, variance_explained
 
+#--------------------------------------------------------------------------------
 def plot_kmeans(data, labels, x_axis, y_axis, centers, title):
     #reassign labels for kmeans
     new_labels = reassign_class_labels(labels)
