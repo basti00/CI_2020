@@ -38,40 +38,17 @@ def main():
     #TODO set parameters
     tol = 0.0001  # tolerance
     max_iter = 100  # maximum iterations for GN
-    #nr_components = ... #n number of components
 
     #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
     #(alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
-    initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim_pca)
-    final_centers, cum_dist, labels_2dim = k_means(x_2dim_pca, nr_components, initial_centers, max_iter, tol)
+    initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
+    final_centers, cum_dist, km_labels_2dim = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
 
-    # plt.plot(cum_dist)
-    # plt.xlabel("Iterations")
-    # plt.ylabel("Distance")
-    # plt.title("k-means cumulative distance")
-    # plt.show()
 
-    
-    # reassign labels for kmeans
-    print(reassign_class_labels(labels_2dim))
-    new_labels = reassign_class_labels(labels_2dim)
-    reshuffled_labels =np.zeros_like(labels_2dim)
-    reshuffled_labels[labels_2dim==0] = new_labels[0]
-    reshuffled_labels[labels_2dim==1] = new_labels[1]
-    reshuffled_labels[labels_2dim==2] = new_labels[2]
-
-    # print kmeans plot
-    plt.scatter(x_2dim_pca[reshuffled_labels==0,0], x_2dim_pca[reshuffled_labels==0,1], label='Iris-Setosa')
-    plt.scatter(x_2dim_pca[reshuffled_labels==1,0], x_2dim_pca[reshuffled_labels==1,1], label='Iris-Versicolor')
-    plt.scatter(x_2dim_pca[reshuffled_labels==2,0], x_2dim_pca[reshuffled_labels==2,1], label='Iris-Virgnica')
-    plt.scatter(final_centers[0], final_centers[1], label='Centers', marker="x", color="black")
-    plt.xlabel(feature_names[0])
-    plt.ylabel(feature_names[2])
-    plt.title("k-means with PCA")
-    plt.legend()
-    plt.show()
+    # Plots for k-means
+    plot_kmeans(x_2dim, km_labels_2dim, feature_names[0], feature_names[2], final_centers, "k-means")
 
     # Plots for EM
     #plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
@@ -90,35 +67,14 @@ def main():
     #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
     #(alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
     initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_4dim)
-    final_centers, cum_dist, labels_4d = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
+    final_centers, cum_dist, km_labels_4dim = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
     #TODO: visualize your results by looking at the same slice as in 1)
-    # plt.plot(cum_dist)
-    # plt.xlabel("Iterations")
-    # plt.ylabel("Distance")
-    # plt.title("k-means cumulative distance")
-    # plt.show()
     
-    # reassign labels for kmeans
-    # print(reassign_class_labels(labels_4d))
-    # new_labels = reassign_class_labels(labels_4d)
-    # reshuffled_labels =np.zeros_like(labels_4d)
-    # reshuffled_labels[labels_4d==0] = new_labels[0]
-    # reshuffled_labels[labels_4d==1] = new_labels[1]
-    # reshuffled_labels[labels_4d==2] = new_labels[2]
-
-    # # print kmeans plot
-    # plt.scatter(x_4dim[reshuffled_labels==0,0], x_4dim[reshuffled_labels==0,1], label='Iris-Setosa')
-    # plt.scatter(x_4dim[reshuffled_labels==1,0], x_4dim[reshuffled_labels==1,1], label='Iris-Versicolor')
-    # plt.scatter(x_4dim[reshuffled_labels==2,0], x_4dim[reshuffled_labels==2,1], label='Iris-Virgnica')
-    # plt.scatter(final_centers[0], final_centers[1], label='Centers', marker="x", color="black")
-    # plt.xlabel(feature_names[0])
-    # plt.ylabel(feature_names[2])
-    # plt.title("k-means")
-    # plt.legend()
-    # plt.show()
+    # Plots for k-means
+    plot_kmeans(x_4dim, km_labels_4dim, feature_names[0], feature_names[2], final_centers, "k-means 4 Dimensions")
     
-    # EM
+    # Plots for EM
     # plt.plot(log_likelyhood)
     # plt.show()
 
@@ -423,6 +379,24 @@ def PCA(data,nr_dimensions=None, whitening=False):
 
     return transformed.T, variance_explained
 
+def plot_kmeans(data, labels, x_axis, y_axis, centers, title):
+    #reassign labels for kmeans
+    new_labels = reassign_class_labels(labels)
+    reshuffled_labels =np.zeros_like(labels)
+    reshuffled_labels[labels==0] = new_labels[0]
+    reshuffled_labels[labels==1] = new_labels[1]
+    reshuffled_labels[labels==2] = new_labels[2]
+
+    # print kmeans plot
+    plt.scatter(data[reshuffled_labels==0,0], data[reshuffled_labels==0,1], label='Iris-Setosa')
+    plt.scatter(data[reshuffled_labels==1,0], data[reshuffled_labels==1,1], label='Iris-Versicolor')
+    plt.scatter(data[reshuffled_labels==2,0], data[reshuffled_labels==2,1], label='Iris-Virgnica')
+    plt.scatter(centers[0], centers[1], label='Centers', marker="x", color="black")
+    plt.xlabel(x_axis)
+    plt.ylabel(y_axis)
+    plt.title(title)
+    plt.legend()
+    plt.show()
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 # Helper Functions
