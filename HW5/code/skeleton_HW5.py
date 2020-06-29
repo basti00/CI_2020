@@ -11,6 +11,11 @@ from sklearn import datasets
 #--------------------------------------------------------------------------------
 # Assignment 5
 def main():
+
+    number = 1
+    EM = True
+    KMean = False
+
     #------------------------
     # 0) Get the input
     ## (a) load the modified iris data
@@ -31,75 +36,84 @@ def main():
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
-    scenario = 1
-    dim = 2
-    nr_components = 3
+    if number == 1:
+        scenario = 1
+        dim = 2
+        nr_components = 3
 
-    #TODO set parameters
-    tol = 0.0001  # tolerance
-    max_iter = 100  # maximum iterations for GN
+        #TODO set parameters
+        tol = 0.0001  # tolerance
+        max_iter = 100  # maximum iterations for GN
 
-    #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+        #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    #(alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
-    initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
-    final_centers, cum_dist, km_labels_2dim = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
+        if EM:
+            (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
+            (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+        
+        if KMean:
+            initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
+            final_centers, cum_dist, km_labels_2dim = k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
 
+            # Plots for k-means
+            plot_kmeans(x_2dim, km_labels_2dim, feature_names[0], feature_names[2], final_centers, "k-means")
 
-    # Plots for k-means
-    plot_kmeans(x_2dim, km_labels_2dim, feature_names[0], feature_names[2], final_centers, "k-means")
-
-    # Plots for EM
-    #plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
+        # Plots for EM
+        #plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
-    scenario = 2
-    dim = 4
-    nr_components = 3
+    if number == 2:
+        scenario = 2
+        dim = 4
+        nr_components = 3
 
-    tol = 0.0001  # tolerance
-    max_iter = 100  # maximum iterations for GN
+        tol = 0.0001  # tolerance
+        max_iter = 100  # maximum iterations for GN
 
-    #plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset 4 Dim")
+        #plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset 4 Dim")
 
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
-    #(alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
-    initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_4dim)
-    final_centers, cum_dist, km_labels_4dim = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
+        if EM:
+            (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
+            (alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+        
+        if KMean:
+            initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_4dim)
+            final_centers, cum_dist, km_labels_4dim = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
+        
+            # Plots for k-means
+            plot_kmeans(x_4dim, km_labels_4dim, feature_names[0], feature_names[2], final_centers, "k-means 4 Dimensions")
+        
+        # Plots for EM
+        # plt.plot(log_likelyhood)
+        # plt.show()
 
-    #TODO: visualize your results by looking at the same slice as in 1)
-    
-    # Plots for k-means
-    plot_kmeans(x_4dim, km_labels_4dim, feature_names[0], feature_names[2], final_centers, "k-means 4 Dimensions")
-    
-    # Plots for EM
-    # plt.plot(log_likelyhood)
-    # plt.show()
-
-    # plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
+        # plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
 
     #------------------------
     # 3) Perform PCA to reduce the dimension to 2 while preserving most of the variance.
     # Then, evaluate the EM- and the KMeans- Algorithm  on the transformed data
-    scenario = 3
-    dim = 2
-    nr_components = 3
+    if number == 3:
+        scenario = 3
+        dim = 2
+        nr_components = 3
 
-    #TODO set parameters
-    #tol = ...  # tolerance
-    #max_iter = ...  # maximum iterations for GN
-    #nr_components = ... #n number of components
+        #TODO set parameters
+        #tol = ...  # tolerance
+        #max_iter = ...  # maximum iterations for GN
+        #nr_components = ... #n number of components
 
-    #TODO: implement
-    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
-    #... = EM(x_2dim_pca, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
-    #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-    #... = k_means(x_2dim_pca, nr_components, initial_centers, max_iter, tol)
+        #TODO: implement
+        if EM:
+            (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+            (alpha_0, mean_0, cov_0, log_likelyhood, labels_pca) = EM(x_2dim_pca, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+        
+        if KMean:
+            #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
+            #... = k_means(x_2dim_pca, nr_components, initial_centers, max_iter, tol)
 
-    #TODO: visualize your results
-    #TODO: compare PCA as pre-processing (3.) to PCA as post-processing (after 2.)
+        #TODO: visualize your results
+        #TODO: compare PCA as pre-processing (3.) to PCA as post-processing (after 2.)
 
     pass
 
