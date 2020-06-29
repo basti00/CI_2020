@@ -142,12 +142,17 @@ def main():
             initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim_pca)
             final_centers, cum_dist, km_labels_pca = k_means(x_2dim_pca ,nr_components, initial_centers, max_iter, tol)
 
+            # Plots for k-means
+            plt.plot(cum_dist)
+            plt.xlabel("Iterations")
+            plt.ylabel("Distance")
+            plt.title("k-means cumulative distance")
+            plt.show()
+
             plot_kmeans(x_2dim_pca, km_labels_pca, feature_names[0], feature_names[2], final_centers, "k-means PCA")
 
         #TODO: visualize your results
         #TODO: compare PCA as pre-processing (3.) to PCA as post-processing (after 2.)
-
-    pass
 
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
