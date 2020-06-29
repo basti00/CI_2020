@@ -51,7 +51,7 @@ def main():
     dim = 4
     nr_components = 3
 
-    tol = 0.001  # tolerance
+    tol = 0.01  # tolerance
     max_iter = 100  # maximum iterations for GN
     nr_components = 3 #n number of components
 
@@ -122,9 +122,9 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
 
         mean_0 = X[np.random.choice(X.shape[0], nr_components, replace=False)].T
 
-    print(alpha_0.shape)
-    print(mean_0.shape)
-    print(cov_0.shape)
+    #print(alpha_0.shape)
+    #print(mean_0.shape)
+    print(cov_0.T[0])
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
@@ -169,8 +169,10 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
         
         log_likelihood.append(log_likelihood_it)
         if len(log_likelihood) > 1:
+            print("All log:", log_likelihood)
             print(np.abs(log_likelihood[-1] - log_likelihood[-2]))
         if len(log_likelihood) > 1 and np.abs(log_likelihood[-1] - log_likelihood[-2]) < tol:
+            plt.plot(log_likelihood)
             return alpha_0, mean_0, cov_0, log_likelihood, r
 
     return alpha_0, mean_0, cov_0, log_likelihood, r
@@ -209,12 +211,16 @@ def em_maximization(N, K, alpha_0, X, mean_0, cov_0, r):
         #calc cov_0 new
         cov_temp = 0
         for n in range(N):
-            cov_temp += r[k][n] * (X[n] - mean_0[k]) * (X[n] - mean_0[k]).T
+            cov_temp += r[k][n] *  np.multiply.outer((X[n] - mean_0[k]), (X[n] - mean_0[k]))
 
         cov_0[k] = cov_temp / N_k
 
         #calc alpha_0 new
         alpha_0[k] = N_k / N
+
+        #print("Alpha:", alpha_0)
+        #print("Mean:", mean_0)
+        #print("Cov:", cov)2
 
 def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
     #calc log_likelihood per iteration
@@ -223,8 +229,8 @@ def em_likelyhood_calc(N, K, alpha_0, X, mean_0, cov_0):
     for n in range(N):
         temp = 0
         for k in range(K):
-            temp += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k], log=True)
-        log_likelihood_it += np.log10(temp)
+            temp += alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k],log=False)
+        log_likelihood_it += np.log(temp)
     return log_likelihood_it
 #--------------------------------------------------------------------------------
 def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
