@@ -16,7 +16,7 @@ def main():
 
     # Set each to True to see the plots for this classifier
     show_EM = True
-    show_kmean = False
+    show_kmean = True
 
     #------------------------
     # 0) Get the input
@@ -95,7 +95,7 @@ def main():
             plt.plot(log_likelyhood)
             plt.show()
 
-            plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
+            plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
 
 
         if show_kmean:
@@ -122,7 +122,7 @@ def main():
         if show_EM:
             tol = 0.001
 
-            (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
+            (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim_pca)
             (alpha_0, mean_0, cov_0, log_likelyhood, labels_pca) = EM(x_2dim_pca, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
         
             # Plot for EM
