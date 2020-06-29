@@ -13,8 +13,10 @@ from sklearn import datasets
 def main():
 
     scenario = 1
-    EM = True
-    KMean = False
+
+    # Set each to True to see the plots for this classifier
+    show_EM = True
+    show_kmean = False
 
     #------------------------
     # 0) Get the input
@@ -42,7 +44,7 @@ def main():
 
         max_iter = 100  # maximum iterations for GN
 
-        if EM:
+        if show_EM:
             tol = 0.001
 
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
@@ -59,7 +61,7 @@ def main():
 
             plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
 
-        if KMean:
+        if show_kmean:
             tol = 0.0001
 
             initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
@@ -82,7 +84,7 @@ def main():
 
         max_iter = 100  # maximum iterations for GN
 
-        if EM:
+        if show_EM:
             tol = 0.001
 
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
@@ -96,7 +98,7 @@ def main():
             plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
 
 
-        if KMean:
+        if show_kmean:
             tol = 0.0001
 
             initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_4dim)
@@ -117,7 +119,7 @@ def main():
         nr_components = 3 #n number of components
 
         #TODO: implement
-        if EM:
+        if show_EM:
             tol = 0.001
 
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario)
@@ -134,9 +136,13 @@ def main():
 
             plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM 2 Dim")
 
-        if KMean:
-            #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-            #... = k_means(x_2dim_pca, nr_components, initial_centers, max_iter, tol)
+        if show_kmean:
+            tol = 0.0001
+
+            initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim_pca)
+            final_centers, cum_dist, km_labels_pca = k_means(x_2dim_pca ,nr_components, initial_centers, max_iter, tol)
+
+            plot_kmeans(x_2dim_pca, km_labels_pca, feature_names[0], feature_names[2], final_centers, "k-means PCA")
 
         #TODO: visualize your results
         #TODO: compare PCA as pre-processing (3.) to PCA as post-processing (after 2.)
