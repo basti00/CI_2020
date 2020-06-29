@@ -132,7 +132,7 @@ def main():
             plot_iris_data(x_2dim_pca,labels_pca, feature_names[0], feature_names[2], "Iris Dataset EM PCA")
 
             for k in range(nr_components):
-                plot_gauss_contour(mean_0[k], cov_0[k], 4, 9, 0, 8 ,20)
+                plot_gauss_contour(mean_0[k], cov_0[k], 2, 9, 0, 8 ,20)
 
             plot_iris_data(x_2dim_pca,labels_pca, feature_names[0], feature_names[2], "Iris Dataset EM PCA")
 
