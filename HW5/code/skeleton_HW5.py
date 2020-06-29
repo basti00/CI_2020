@@ -39,11 +39,13 @@ def main():
     #nr_components = ... #n number of components
 
     (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
+    (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
     #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
     #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
 
     #TODO visualize your results
+
+    plot_iris_data(x_2dim,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
@@ -61,7 +63,7 @@ def main():
     #kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
     #TODO: visualize your results by looking at the same slice as in 1)
-    plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    
 
 
     #------------------------
@@ -128,7 +130,7 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
-def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
+def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
     """ perform the EM-algorithm in order to optimize the parameters of a GMM
     with K components
     Input:
@@ -158,7 +160,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
 
     N = X.shape[0]
 
-    for _ in range(max_iter):
+    for i in range(max_iter):
 
         r = em_expectation(N,K,alpha_0, X,mean_0, cov_0)
 
@@ -169,13 +171,27 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
         
         log_likelihood.append(log_likelihood_it)
         if len(log_likelihood) > 1:
-            print("All log:", log_likelihood)
-            print(np.abs(log_likelihood[-1] - log_likelihood[-2]))
+            #print("All log:", log_likelihood)
+            print(i, np.abs(log_likelihood[-1] - log_likelihood[-2]))
+            pass
         if len(log_likelihood) > 1 and np.abs(log_likelihood[-1] - log_likelihood[-2]) < tol:
-            plt.plot(log_likelihood)
-            return alpha_0, mean_0, cov_0, log_likelihood, r
+            break
 
-    return alpha_0, mean_0, cov_0, log_likelihood, r
+    labels = np.zeros((N,1), dtype=np.int)
+    for n in range(N):
+        value = np.zeros(K)
+        for k in range(K):
+            value[k] = alpha_0[k] * likelihood_multivariate_normal(X[n], mean_0[k], cov_0[k])
+        labels[n] = np.argmax(value)
+
+    print(real_labels)
+    print(labels.T)
+
+    print(reassign_class_labels(labels))
+
+    plt.plot(log_likelihood)
+    plt.show()
+    return alpha_0, mean_0, cov_0, log_likelihood, labels
 
 def em_expectation(N, K, alpha_0, X, mean_0, cov_0):
     r = np.zeros((K, X.shape[0]))
