@@ -25,9 +25,9 @@ def main():
     x_2dim_pca_w, variance_w = PCA(data,nr_dimensions=2,whitening=True)
 
     ## (c) visually inspect the data with the provided function (see example below)
-    plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset with PCA, (variance_explained: "+str(variance)+")")
-    plot_iris_data(x_2dim_pca_w,labels, feature_names[0], feature_names[2], "Iris Dataset with PCA white, (variance_explained: "+str(variance_w)+")")
-    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    # plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset with PCA, (variance_explained: "+str(variance)+")")
+    # plot_iris_data(x_2dim_pca_w,labels, feature_names[0], feature_names[2], "Iris Dataset with PCA white, (variance_explained: "+str(variance_w)+")")
+    # plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
@@ -40,12 +40,12 @@ def main():
     max_iter = 100  # maximum iterations for GN
     #nr_components = ... #n number of components
 
-    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    #plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
-    (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-    (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
+    #(alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
     #initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_2dim)
-    #k_means(x_2dim, nr_components, initial_centers, max_iter, tol, labels, feature_names)
+    #k_means(x_2dim, nr_components, initial_centers, max_iter, tol)
 
     # plt.plot(cumulative_distance)
     # plt.xlabel("Iterations")
@@ -73,35 +73,59 @@ def main():
     # plt.legend()
     # plt.show()
 
-    plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
+    # Plots for EM
+    #plot_iris_data(x_2dim_pca,labels_2dim, feature_names[0], feature_names[2], "Iris Dataset EM")
 
     #------------------------
     # 2) Consider 4-dimensional data and evaluate the EM- and the KMeans- Algorithm
     scenario = 2
     dim = 4
-    nr_components = 3
+    nr_components = 4
 
-    tol = 0.001  # tolerance
+    tol = 0.0001  # tolerance
     max_iter = 100  # maximum iterations for GN
-    nr_components = 3 #n number of components
 
+    #plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset 4 Dim")
 
+    #(alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
+    #(alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+    initial_centers = init_k_means(dimension = dim, nr_clusters=nr_components, scenario=scenario, X=x_4dim)
+    final_centers, cum_dist, labels_4d = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
 
-    if True:
+    #TODO: visualize your results by looking at the same slice as in 1)
+    plt.plot(cum_dist)
+    plt.xlabel("Iterations")
+    plt.ylabel("Distance")
+    plt.title("k-means cumulative distance")
+    plt.show()
 
-        plot_iris_data(x_4dim,labels, feature_names[0], feature_names[2], "Iris Dataset 4 Dim")
+    
+    # # reassign labels for kmeans
+    # print(reassign_class_labels(labels_2dim))
+    # new_labels = reassign_class_labels(labels_2dim)
+    # reshuffled_labels =np.zeros_like(labels_2dim)
+    # reshuffled_labels[labels_2dim==0] = new_labels[0]
+    # reshuffled_labels[labels_2dim==1] = new_labels[1]
+    # reshuffled_labels[labels_2dim==2] = new_labels[2]
+    reshuffled_labels = labels_4d
 
-        (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
-        (alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
-        #initial_centers = init_k_means(dimension = dim, nr_cluster=nr_components, scenario=scenario)
-        #kk = k_means(x_4dim,nr_components, initial_centers, max_iter, tol)
+    # print kmeans plot
+    plt.scatter(x_2dim_pca[reshuffled_labels==0,0], x_2dim_pca[reshuffled_labels==0,1], label='Group 1')
+    plt.scatter(x_2dim_pca[reshuffled_labels==1,0], x_2dim_pca[reshuffled_labels==1,1], label='Group 2')
+    plt.scatter(x_2dim_pca[reshuffled_labels==2,0], x_2dim_pca[reshuffled_labels==2,1], label='Group 3')
+    plt.scatter(x_2dim_pca[reshuffled_labels==3,0], x_2dim_pca[reshuffled_labels==3,1], label='Group 4')
+    plt.scatter(final_centers[0], final_centers[1], label='Centers', marker="x", color="black")
+    plt.xlabel(feature_names[0])
+    plt.ylabel(feature_names[2])
+    plt.title("k-means")
+    plt.legend()
+    plt.show()
+    
+    # EM
+    # plt.plot(log_likelyhood)
+    # plt.show()
 
-        #TODO: visualize your results by looking at the same slice as in 1)
-        
-        plt.plot(log_likelyhood)
-        plt.show()
-
-        plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
+    # plot_iris_data(x_4dim,labels_4dim, feature_names[0], feature_names[2], "Iris Dataset EM 4 Dim")
 
     #------------------------
     # 3) Perform PCA to reduce the dimension to 2 while preserving most of the variance.
@@ -303,12 +327,10 @@ def init_k_means(dimension=None, nr_clusters=None, scenario=None, X=None):
     Returns:
         initial_centers... initial cluster centers,  D x nr_clusters"""
     #TODO: choose suitable inital values for each scenario
-
-    if (scenario == 1):
-        return X[np.random.choice(X.shape[0], nr_clusters, replace=False)].T
+    return X[np.random.choice(X.shape[0], nr_clusters, replace=False)].T
 
 #--------------------------------------------------------------------------------
-def k_means(X,K, centers_0, max_iter, tol, labels, feature_names):
+def k_means(X,K, centers_0, max_iter, tol):
     """ perform the KMeans-algorithm in order to cluster the data into K clusters
     Input:
         X... samples, nr_samples x dimension (D)
@@ -568,5 +590,5 @@ def sanity_checks():
 #--------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    sanity_checks()
+    #sanity_checks()
     main()
