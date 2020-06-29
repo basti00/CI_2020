@@ -48,7 +48,7 @@ def main():
             tol = 0.001
 
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_2dim)
-            (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+            (alpha_0, mean_0, cov_0, log_likelyhood, labels_2dim) =  EM(x_2dim,nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
         
             # Plot for EM
             plt.plot(log_likelyhood)
@@ -88,7 +88,7 @@ def main():
             tol = 0.001
 
             (alpha_0, mean_0, cov_0) = init_EM(dimension = dim, nr_components= nr_components, scenario=scenario, X=x_4dim)
-            (alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol, labels)
+            (alpha_0, mean_0, cov_0, log_likelyhood, labels_4dim) = EM(x_4dim, nr_components, alpha_0, mean_0, cov_0, max_iter, tol)
         
 
             # Plot for EM
@@ -202,7 +202,7 @@ def init_EM(dimension=2,nr_components=3, scenario=None, X=None):
 
     return (alpha_0, mean_0, cov_0)
 #--------------------------------------------------------------------------------
-def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
+def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol):
     """ perform the EM-algorithm in order to optimize the parameters of a GMM
     with K components
     Input:
