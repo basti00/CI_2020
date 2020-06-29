@@ -22,9 +22,12 @@ def main():
 
     #TODO: implement PCA
     x_2dim_pca, variance = PCA(data,nr_dimensions=2,whitening=False)
+    x_2dim_pca_w, variance_w = PCA(data,nr_dimensions=2,whitening=True)
 
     ## (c) visually inspect the data with the provided function (see example below)
-    plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset")
+    plot_iris_data(x_2dim_pca,labels, feature_names[0], feature_names[2], "Iris Dataset with PCA, (variance_explained: "+str(variance)+")")
+    plot_iris_data(x_2dim_pca_w,labels, feature_names[0], feature_names[2], "Iris Dataset with PCA white, (variance_explained: "+str(variance_w)+")")
+    plot_iris_data(x_2dim,labels, feature_names[0], feature_names[2], "Iris Dataset")
 
     #------------------------
     # 1) Consider a 2-dim slice of the data and evaluate the EM- and the KMeans- Algorithm
@@ -371,7 +374,16 @@ def PCA(data,nr_dimensions=None, whitening=False):
     else:
         dim = 2
 
+    if whitening:
+        X_centered = data - np.mean(data, axis=0)
+        Sigma = np.dot(X_centered.T, X_centered) / X_centered.shape[0]
+        U, L, _ = np.linalg.svd(Sigma)
+        W = np.dot(np.diag(1.0 / np.sqrt(L + 1e-5)), U.T)
+        data = np.dot(X_centered, W.T)
+
     data = data.T
+    var_bef = np.var(data)
+
     cov_matrix = np.cov([data[0, :], data[1, :], data[2, :], data[3, :]])
 
     eig_values, eig_vector = np.linalg.eig(cov_matrix)
@@ -379,12 +391,20 @@ def PCA(data,nr_dimensions=None, whitening=False):
     eigs = [(np.abs(eig_values[i]), eig_vector[:, i]) for i in range(len(eig_values))]
     eigs.sort(key=lambda x: x[0], reverse=True)
 
-    transform_mat = np.hstack((eigs[0][1].reshape(4, 1), -eigs[1][1].reshape(4, 1))).T
+    transform_mat = np.hstack(((1 - 2*(not whitening))*eigs[0][1].reshape(4, 1), (1 - 2*whitening)*eigs[1][1].reshape(4, 1))).T
     transformed = transform_mat.dot(data)
 
+    var_aft = np.var(transformed)
+
+    variance_explained = (eig_values[0] + eig_values[1]) / np.sum(eig_values)
+    print("var before:\n", var_bef)
+    print("variance_explained:\n", variance_explained)
+    print("eig_values:\n", eig_values)
+    print("eig_vector:\n", eig_vector)
+    print("eigs:\n", eigs)
     #TODO calc covariance
 
-    return transformed.T, 666666
+    return transformed.T, variance_explained
 
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
