@@ -177,7 +177,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
         if len(log_likelihood) > 1 and np.abs(log_likelihood[-1] - log_likelihood[-2]) < tol:
             break
 
-    labels = np.zeros((N,1), dtype=np.int)
+    labels = np.zeros(N, dtype=np.int)
     for n in range(N):
         value = np.zeros(K)
         for k in range(K):
@@ -185,7 +185,7 @@ def EM(X,K,alpha_0,mean_0,cov_0, max_iter, tol, real_labels):
         labels[n] = np.argmax(value)
 
     print(real_labels)
-    print(labels.T)
+    print(labels)
 
     print(reassign_class_labels(labels))
 
@@ -379,6 +379,9 @@ def plot_iris_data(data, labels, x_axis, y_axis, title):
         x_axis... label for the x_axis
         y_axis... label for the y_axis
         title...  title of the plot"""
+
+    print(data.shape)
+    print(labels.shape)
 
     plt.scatter(data[labels==0,0], data[labels==0,1], label='Iris-Setosa')
     plt.scatter(data[labels==1,0], data[labels==1,1], label='Iris-Versicolor')
